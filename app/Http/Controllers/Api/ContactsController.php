@@ -27,8 +27,7 @@ class ContactsController extends ApiController
 
             Mail::send([], [], function($message) use ($send_message)
             {
-                //$message->from('info@gagara-web.ru', 'Гагара-Квест');
-                $message->to('lenchik-sl@list.ru');
+                $message->to(env('MAIL_TO_ADDRESS'));
                 $message->subject('Гагара-Квест приложение. Сообщение');
                 $message->setBody($send_message, 'text/html');
             });

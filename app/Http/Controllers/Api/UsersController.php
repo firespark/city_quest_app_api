@@ -21,7 +21,7 @@ class UsersController extends ApiController
             $user = User::select('id', 'name', 'email', 'notes')->where('token', $api_token)->where('active', 1)->first();
 
             if(!$user) {
-                $user = static::add($api_token);
+                $user = User::add($api_token);
 
             }
 

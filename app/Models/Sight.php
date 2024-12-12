@@ -84,7 +84,12 @@ class Sight extends Model
             {
                 $strArr = explode(',', $arr);
                 $correct = 0;
-
+                if (in_array(mb_strtolower(trim($answer[$key])), $strArr))
+                    {
+                        $correct = 1;
+                        unset($answerArr[$key]);
+                    }
+                /* 
                 foreach($answer as $answer_key => $answer_value) {
                     if (in_array(mb_strtolower(trim($answer_value)), $strArr))
                     {
@@ -93,7 +98,7 @@ class Sight extends Model
                         break;
                     }
                     
-                }
+                } */
 
                 if(!$correct)
                 {

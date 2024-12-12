@@ -9,7 +9,7 @@ use App\Models\Sight;
 use App\Models\Game;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Mail;
 
 class GamesController extends ApiController
 {
@@ -62,9 +62,12 @@ class GamesController extends ApiController
                     if($game->is_finish($quest_id, $game->step, $game->status))
                     {
                         $game->finished = 1;
+                        $game->save();
                     }
-
-                    $game->updateStatus();
+                    else {
+                        $game->updateStatus();
+                    }
+                    
 
                     $data = $game->getData($quest_id, $user_id);
                     
@@ -243,6 +246,28 @@ class GamesController extends ApiController
         return $this->response->responseData();
     }
 
+    public function sendSkip($comment, $question_num, $quest_id, $step)
+    {
+       
+        if ($comment)
+        {
+            $sight = Sight::select('title')->where('quest_id', $quest_id)->where('step', $step)->first();
+            $quest = Quest::select('title')->where('id', $quest_id)->first();
+            $send_message = 'Квест: ' . $quest->title . '<br>';
+            $send_message .= 'Достопримечательность: ' . $sight->title . '<br>';
+            $send_message .= 'Вопрос номер: ' . $question_num . '<br>';
+            $send_message .= 'Комментарий: ' . $comment . '<br>'; 
+
+            Mail::send([], [], function($message) use ($send_message)
+            {
+                $message->to(env('MAIL_TO_ADDRESS'));
+                $message->subject('Гагара-Квест приложение. Отчёт о пропуске задания.');
+                $message->setBody($send_message, 'text/html');
+            });
+
+        }
+
+    }
 
     public function getSkip(Request $request, $quest_id){
         $user_id = User::autoriseUserByToken($request);
@@ -266,7 +291,7 @@ class GamesController extends ApiController
                         $gameItem->step = $game->step;
                     }
 
-                
+                    
                     if ( 
                         ($gameItem->skip1 && ($game->status == 0)) ||
                         ($gameItem->skip2 && ($game->status == 1))
@@ -278,17 +303,24 @@ class GamesController extends ApiController
                         $this->response->setError('Пропусков больше нет.');
                     }
                     else
-                    {
+                    {   
+                        $reason_id = $request->get('reason_id');
+                        $comment = $request->get('comment');
+
+                        if ($reason_id == 3) {
+                            $this->sendSkip($comment, $game->status + 1, $quest_id, $game->step);
+                        }
+                        
                         switch ($game->status) {
                             case 0:
-                                $gameItem->skip1 = $request->get('reason_id');
-                                $gameItem->skip_comment_1 = $request->get('comment');
+                                $gameItem->skip1 = $reason_id;
+                                $gameItem->skip_comment_1 = $comment;
                                 $game->status = 1;
                                 break;
 
                             case 1:
-                                $gameItem->skip2 = $request->get('reason_id');
-                                $gameItem->skip_comment_2 = $request->get('comment');
+                                $gameItem->skip2 = $reason_id;
+                                $gameItem->skip_comment_2 = $comment;
                                 $game->status = 2;
                                 break;
                         }

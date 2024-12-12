@@ -60,7 +60,10 @@ class Game extends Model
 
             $mode = Mode::select('title')->where('id', $game->mode_id)->first();
 
-            if($is_finished) {
+            $sight = Sight::where('quest_id', $quest_id)->where('step', $step)->first();
+            $max_step = $sight->getMaxStep($quest_id);
+
+            if($is_finished && $step == $max_step) {
                 $data['step'] = $step;
                 $data['step_total'] = $game->step;
                 $data['status'] = $status;
@@ -80,8 +83,8 @@ class Game extends Model
 
                 $data['sight_hint1'] = null;
                 $data['sight_hint2'] = null;
-                $data['show_hint'] = true;
-                $data['show_skip'] = true;
+                $data['show_hint'] = false;
+                $data['show_skip'] = false;
 
                 $data['task1'] = null;
                 $data['task2'] = null;
@@ -94,7 +97,7 @@ class Game extends Model
             else {
 
                 
-                $sight = Sight::where('quest_id', $quest_id)->where('step', $step)->first();
+                
                 $gameItem = Gameitem::where('game_id', $game->id)->where('step', $step)->first();
 
                 $sightData = $sight->makeSightData($status, $game->mode_id);
@@ -128,7 +131,7 @@ class Game extends Model
                 $data['sight_hint1'] = $hintsData['sight_hint1'];
                 $data['sight_hint2'] = $hintsData['sight_hint2'];
                 $data['show_hint'] = $hintsData['show_hint'];
-                $data['show_skip'] = $hintsData['show_skip'];
+                $data['show_skip'] = ($game->skips_number < 1) ? false : $hintsData['show_skip'];
 
                 $data['task1'] = $tasksData['task1'];
                 $data['task2'] = $tasksData['task2'];
@@ -159,8 +162,8 @@ class Game extends Model
 
             $data['sight_hint1'] = null;
             $data['sight_hint2'] = null;
-            $data['show_hint'] = true;
-            $data['show_skip'] = true;
+            $data['show_hint'] = false;
+            $data['show_skip'] = false;
 
             $data['task1'] = null;
             $data['task2'] = null;
@@ -208,6 +211,7 @@ class Game extends Model
 
         return;
     }
+
 
     public function getPs($content)
     {
