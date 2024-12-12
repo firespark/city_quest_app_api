@@ -83,8 +83,7 @@ class HomeController extends Controller
 
             Mail::send([], [], function($message) use ($send_message)
             {
-                //$message->from('info@gagara-web.ru', 'Гагара-Квест');
-                $message->to('lenchik-sl@list.ru');
+              
                 $message->subject('Гагара-Квест приложение. Сообщение');
                 $message->setBody($send_message, 'text/html');
             });
@@ -94,8 +93,6 @@ class HomeController extends Controller
         
         Mail::raw('Текст письма', function($message)
         {
-            $message->from('info@gagara-web.ru', 'Test');
-            $message->to('lenchik-sl@list.ru');
             $message->subject('Welcome to the Tutorials Point');
         });
 

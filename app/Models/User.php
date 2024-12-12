@@ -47,7 +47,7 @@ class User extends Authenticatable
     }
 
     
-    public function add($api_token)
+    public static function add($api_token)
     {
 
         $user = new static;
