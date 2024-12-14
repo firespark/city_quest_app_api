@@ -28,14 +28,25 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];*/
 
-    public function quests()
+    public function games()
     {
-        return $this->hasMany(Quest::class);
+        return $this->hasMany(Game::class);
     }
 
     public function tokens()
     {
         return $this->hasMany(Token::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($user) {
+            $user->games()->each(function ($game) {
+                $game->delete(); 
+            });
+        });
     }
 
     
@@ -45,7 +56,6 @@ class User extends Authenticatable
         return Str::random(77) . time();
 
     }
-
     
     public static function add($api_token)
     {

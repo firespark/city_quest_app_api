@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model
 {
+
     public function quest()
     {
         return $this->belongsTo(Quest::class);
@@ -23,7 +24,16 @@ class Game extends Model
 
     public function gameitems()
     {
-        return $this->hasMany(Game::class);
+        return $this->hasMany(Gameitem::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($game) {
+            $game->gameitems()->delete();
+        });
     }
 
     public function getData($quest_id, $user_id, $level = null)

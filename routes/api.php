@@ -17,11 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::group(['namespace' => 'App\Http\Controllers\Api',], function() {
 
     Route::post('/auth/login', 'AuthController@login');
+    Route::post('/auth/loginGoogle', 'AuthController@loginGoogle');
     Route::post('/auth/logout', 'AuthController@logout');
     Route::post('/auth/checkEmail', 'AuthController@checkEmail');
     Route::post('/auth/sendCode', 'AuthController@sendCode');
     Route::post('/auth/checkCode', 'AuthController@checkCode');
     Route::post('/auth/changePassword', 'AuthController@changePassword');
+    Route::post('/auth/sendPasswordReset', 'AuthController@sendPasswordReset');
     Route::get('/auth/getAuth', 'AuthController@getAuth');
 
     Route::get('/cities/all', 'CitiesController@index');
@@ -50,8 +52,10 @@ Route::group(['namespace' => 'App\Http\Controllers\Api',], function() {
     Route::get('/quests/opened', 'QuestsController@opened');
 
     Route::get('/users/get', 'UsersController@get');
+    Route::get('/users/getStatus', 'UsersController@getStatus');
     Route::post('/users/saveName', 'UsersController@saveName');
     Route::post('/users/saveNotes', 'UsersController@saveNotes');
     Route::post('/users/savePassword', 'UsersController@savePassword');
+    //Route::get('/users/testDelete', 'UsersController@testDelete');
 
 });
