@@ -90,4 +90,6 @@ post:  /api/users/savePassword - save player's password
 
 ### 2.0
 * Released: July 22, 2023
-
+  
+### 3.0
+* Released: December 12, 2024
