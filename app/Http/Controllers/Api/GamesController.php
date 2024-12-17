@@ -358,6 +358,37 @@ class GamesController extends ApiController
         return $this->response->responseData();
     }
 
+    public function reset(Request $request, $quest_id){
+
+        $user_id = User::autoriseUserByToken($request);
+        
+        if($user_id) 
+        {
+
+            $game = Game::where('user_id', $user_id)->where('quest_id', $quest_id)->first();
+
+            if(!empty($game))
+            {
+
+                $game = $game->delete();
+                $this->response->toggleSuccess();
+
+            }
+            else
+            {
+                $this->response->setStatus(404);
+            }
+            
+        }
+
+        else
+        {
+            $this->response->setStatus(401);
+        }
+
+        return $this->response->responseData();
+    }
+
 
     public function setMode(Request $request, $quest_id)
     {
