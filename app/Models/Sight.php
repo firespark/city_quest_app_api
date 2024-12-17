@@ -82,9 +82,9 @@ class Sight extends Model
         {
             foreach($answerArr as $key => $arr)
             {
-                $strArr = explode(',', $arr);
+                $strArr = explode(',', str_replace('-', '', $arr));
                 $correct = 0;
-                if (in_array(mb_strtolower(trim($answer[$key])), $strArr))
+                if (in_array(mb_strtolower(trim(str_replace('-', '', $answer[$key]))), $strArr))
                     {
                         $correct = 1;
                         unset($answerArr[$key]);
