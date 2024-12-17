@@ -38,9 +38,13 @@ class PagesController extends ApiController
             $data['playTitle1'] = $page->item_title1;
             $data['playTitle2'] = $page->item_title2;
             $data['playTitle3'] = $page->item_title3;
+            $data['playTitle4'] = $page->item_title4;
+            $data['playTitle5'] = $page->item_title5;
             $data['playContent1'] = $page->item_desc1;
             $data['playContent2'] = $page->item_desc2;
             $data['playContent3'] = $page->item_desc3;
+            $data['playContent4'] = $page->item_desc4;
+            $data['playContent5'] = $page->item_desc5;
 
             $this->response->setData($data);
             $this->response->toggleSuccess();
