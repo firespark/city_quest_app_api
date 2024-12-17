@@ -39,6 +39,7 @@ Route::group(['namespace' => 'App\Http\Controllers\Api',], function() {
     Route::post('/games/getSkip/{quest_id}', 'GamesController@getSkip');
     Route::post('/games/setMode/{quest_id}', 'GamesController@setMode');
     Route::get('/games/getLevel/{quest_id}/{level}', 'GamesController@getLevel');
+    Route::post('/games/reset/{quest_id}', 'GamesController@reset');
 
     Route::get('/modes/', 'ModesController@index');
 
