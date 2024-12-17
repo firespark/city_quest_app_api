@@ -227,6 +227,7 @@ class Game extends Model
     public function getPs($content)
     {
         $content = str_replace('<p>', '', $content);
+        $content = str_replace('<br>', '</p>', $content);
         //$content = str_replace('</p>', '', $content);
 
         //return $content;
