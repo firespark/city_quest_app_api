@@ -18,7 +18,7 @@ class QuestsController extends ApiController
     {
 
         $quests = Quest::select('id', 'title', 'image')
-                ->where('city_id', $city_id)->get();
+                ->where('city_id', $city_id)->withCount('sights')->get();
 
         if(!empty($quests))
         {
@@ -28,6 +28,7 @@ class QuestsController extends ApiController
                     'id' => $quest->id,
                     'title' => $quest->title,
                     'image' => $quest->getImage(),
+                    'sights_count' => $quest->sights_count,
                     //'city' => $result->city->title,
                 ];
             }
@@ -45,7 +46,7 @@ class QuestsController extends ApiController
     {
 
         $quests = Quest::select('id', 'title', 'image')
-                ->where('featured', 1)->get();
+                ->where('featured', 1)->withCount('sights')->get();
 
         if(!empty($quests))
         {
@@ -55,6 +56,7 @@ class QuestsController extends ApiController
                     'id' => $quest->id,
                     'title' => $quest->title,
                     'image' => $quest->getImage(),
+                    'sights_count' => $quest->sights_count,
                     //'city' => $quest->city->title,
                 ];
             }
@@ -71,7 +73,8 @@ class QuestsController extends ApiController
     public function get($id)
     {
 
-        $quest = Quest::select('id', 'title', 'image', 'content', 'city_id', 'start_point', 'end_point')->where('id', $id)->first();
+        $quest = Quest::select('id', 'title', 'image', 'content', 'city_id', 'start_point', 'end_point')
+            ->where('id', $id)->withCount('sights')->first();
 
         if(!empty($quest))
         {
@@ -84,7 +87,8 @@ class QuestsController extends ApiController
                 'city_id' => $quest->city_id,
                 'city' => $quest->city->title,
                 'start_point' => $quest->start_point, 
-                'end_point' => $quest->end_point
+                'end_point' => $quest->end_point,
+                'sights_count' => $quest->sights_count, 
             ];
 
             $this->response->setData($data);

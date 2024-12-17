@@ -51,6 +51,7 @@ class Game extends Model
         $levels = Sight::where('quest_id', $quest_id)->count();
 
         $data['quest_title'] = $quest->title;
+        $data['quest_city_id'] = $quest->city_id;
         $data['quest_city'] = $quest->getCityTitle();
         $data['levels'] = $levels;
 
