@@ -189,7 +189,7 @@ class SightsController extends Controller
             'sight_id' => $sight->id,
             'text' => $validatedData['hint2_text'],
             'image' => $hint2ImagePath,
-            'type' => 3,
+            'type' => 4,
 
         ]);
 
@@ -204,7 +204,7 @@ class SightsController extends Controller
         $sight = Sight::find($id);
 
         $quests = Quest::pluck('id', 'title')->all();
-        $tasks = Task::where('sight_id',$id)->get();
+        $tasks = Task::where('sight_id', $id)->get();
         $groupedTasks = $tasks->groupBy('type');
 
         $question1 = [];
@@ -213,7 +213,11 @@ class SightsController extends Controller
         $hint2 = [];
 
         foreach ($tasks as $key => $task) {
-            $arr = ['text'=>$task->text, 'image'=>$task->image];
+            $arr = [
+                'id' => $task->id, 
+                'text' => $task->text, 
+                'image' => $task->image
+            ];
             switch ($task->type) {
                 case 1:
                     $question1[] = $arr;
@@ -236,8 +240,8 @@ class SightsController extends Controller
                     break;
             }
         }
-        
-        $fillValue = ['text'=>null,'image'=>null];
+
+        $fillValue = ['id'=> null, 'text'=> null,'image'=> null];
 
         $question1 = array_pad($question1, 3, $fillValue);
 
@@ -255,40 +259,190 @@ class SightsController extends Controller
     
     public function update(Request $request, $id)
     {
-        
-        $this->validate($request, [
+        $sight = Sight::find($id);
+        $validatedData = $request->validate([
             'title' => 'required',
             'step' => 'required',
             'quest_id' => 'required',
-            'question1' => 'required',
-            'answer1' => 'required',
-            'question2' => 'required',
-            'answer2' => 'required',
             'image' => 'nullable|image',
+            'description' => 'required',
+            'address' =>'required',
+            'latitude' =>'required',
+            'longitude' => 'required',
+
+            'task1_id' => ['nullable', 'array'],
+            'task1_text' => ['nullable', 'array'],
+            'task1_text.*' => ['nullable', 'string'], 
+            'task1_image' => ['nullable', 'array'], 
+            'task1_image.*' => ['nullable', 'image'], 
+            'task1_imgsrc' => ['nullable', 'array'],
+            'task1_text' => [
+                function ($attribute, $value, $fail) {
+                    $texts = request()->input('task1_text', []);
+                    $imgsrcs = request()->input('task1_imgsrc', []);
+                    $files = request()->file('task1_image', []);
+                    $hasText = array_filter($texts, fn($text) => !empty(trim($text)));
+                    $hasImg = array_filter($imgsrcs, fn($img) => !empty(trim($img)));
+                    $hasFile = array_filter($files);
+    
+                    if (empty($hasText) && empty($hasFile) && empty($hasImg)) {
+                        $fail('Вы должны заполнить хотя бы одно текстовое поле или загрузить изображение.');
+                    }
+                }
+            ],
+
+            'answer1' => ['required', 'string', 'max:255'],
+
+            'hint1_id' => 'required',
+            'hint1_text' => ['nullable', 'string'],
+            'hint1_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'hint1_imgsrc' => ['nullable', 'string'],
+            'hint1_text' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if (empty($value) && !$request->hasFile('hint1_image') && empty($request->input('hint1_imgsrc')))
+                    {
+                        $fail('Необходимо указать текст подсказки или загрузить изображение.');
+                    }
+                }
+            ],
+
+            'task2_id' => 'required',
+            'task2_text' => ['nullable', 'string'],
+            'task2_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'task2_imgsrc' => ['nullable', 'string'],
+            'task2_text' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if (empty($value) && !$request->hasFile('task2_image') && empty($request->input('task2_imgsrc'))) {
+                        $fail('Необходимо указать текст вопроса 2 или загрузить изображение.');
+                    }
+                }
+            ],
+
+            'answer2' => ['required', 'string', 'max:255'],
+
+            'hint2_id' => 'required',
+            'hint2_text' => ['nullable', 'string'],
+            'hint2_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'hint2_imgsrc' => ['nullable', 'string'],
+            'hint2_text' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if (empty($value) && !$request->hasFile('hint2_image') && empty($request->input('hint2_imgsrc'))) {
+                        $fail('Необходимо указать текст подсказки или загрузить изображение.');
+                    }
+                }
+            ],
+        ]);
+        $quest_slug = Quest::select('slug')->where('id', $validatedData['quest_id'])->first()->slug;
+
+        $slug = explode('-', $quest_slug);
+        $tripNumber = filter_var($slug[1], FILTER_SANITIZE_NUMBER_INT);
+        $imageFolderPath = "/{$slug[0]}/{$slug[1]}/";
+
+        $imagePath = $sight->image;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $fileName = "{$validatedData['step']}.{$extension}";
+            $imagePath = "{$imageFolderPath}{$fileName}";
+    
+            $image->storeAs("public/img{$imageFolderPath}", "{$fileName}", 'public_uploads');
+        }
+        $tasksImagePath = "{$imageFolderPath}tasks/{$validatedData['step']}";
+
+        
+        $sight->update([
+            'title' => $validatedData['title'],
+            'quest_id' => $validatedData['quest_id'],
+            'answer1' => mb_strtolower(trim($validatedData['answer1'])),
+            'answer2' => mb_strtolower(trim($validatedData['answer2'])),
+            'step' => Sight::checkStep($validatedData['step'], $validatedData['quest_id']),
+            'description' => $validatedData['description'],
+            'address' => $validatedData['address'],
+            'latitude' => $validatedData['latitude'],
+            'longitude' => $validatedData['longitude'],
+            'image' => $imagePath,
+        ]);
+        
+        for ($i=0; $i <= 2 ; $i++) { 
+            $type = $i + 1;
+            if ($validatedData['task1_id'][$i]) 
+            {
+                $task1 = Task::find($validatedData['task1_id'][$i]);
+                $task1Image = $validatedData['task1_imgsrc'][$i];
+                if (isset($validatedData['task1_image'][$i]))
+                {
+                    $task1Image = $this->createTaskImage($validatedData['task1_image'][$i], $imageFolderPath, $validatedData['step'], "1-$type");
+                }
+
+                $task1->update([
+                    'text' => $validatedData['task1_text'][$i],
+                    'image' => $task1Image,
+                ]);
+            }
+            else if ($validatedData['task1_text'][$i] || isset($validatedData['task1_image'][$i]))
+            {
+                $task1Image = null;
+                if (isset($validatedData['task1_image'][$i]))
+                {
+                    $task1Image = $this->createTaskImage($validatedData['task1_image'][$i], $imageFolderPath, $validatedData['step'], "1-$type");
+                }
+                
+                $task1 = Task::create([
+                    'quest_id' => $validatedData['quest_id'],
+                    'sight_id' => $sight->id,
+                    'text' => $validatedData['task1_text'][$i],
+                    'image' => $task1Image,
+                    'type' => 1,
+
+                ]);
+            }
+        }
+
+        $task2 = Task::find($validatedData['task2_id']);
+        $task2Image = $validatedData['task2_imgsrc'];
+        if (isset($validatedData['task2_image']))
+        {
+            $task2Image = $this->createTaskImage($request->file('task2_image'), $imageFolderPath, $validatedData['step'], '2');
+        }
+
+        $task2->update([
+            'text' => $validatedData['task2_text'],
+            'image' => $task2Image,
+
         ]);
 
-        $sight = Sight::find($id);
 
-        $sight->step = $sight->checkStep($request->get('step'), $request->get('quest_id'));
         
-        $coordsArr = $sight->getCoordsArr($request->get('coords'));
+        $hint1 = Task::find($validatedData['hint1_id']);
+        $hint1Image = $validatedData['hint1_imgsrc'];
+        if (isset($validatedData['hint1_image']))
+        {
+            $hint1Image = $this->createTaskImage($request->file('hint1_image'), $imageFolderPath, $validatedData['step'], '3');
+        }
 
-        $sight->latitude = $coordsArr['latitude'];
-        $sight->longitude = $coordsArr['longitude'];
+        $hint1->update([
+            'text' => $validatedData['hint1_text'],
+            'image' => $hint1Image,
 
-        $sight->image = $sight->uploadImage($request->file('image'));
+        ]);
 
-        $sight->answer1 = mb_strtolower(trim($request->get('answer1')));
-        $sight->answer2 = mb_strtolower(trim($request->get('answer2')));
+        $hint2 = Task::find($validatedData['hint2_id']);
+        $hint2Image = $validatedData['hint2_imgsrc'];
+        if (isset($validatedData['hint2_image']))
+        {
+            $hint1Image = $this->createTaskImage($request->file('hint2_image'), $imageFolderPath, $validatedData['step'], '4');
+        }
+
+        $hint2->update([
+            'text' => $validatedData['hint2_text'],
+            'image' => $hint2Image,
+
+        ]);
 
 
-        $sight->fill($request->all());
+        return redirect()->route('admin.sights.edit', $sight->id)->with('success', 'Достопримечательность успешно отредактирована!');; 
 
 
-
-        $sight->save();
-
-        return redirect()->route('admin.sights.edit', $id);
     }
 
     
