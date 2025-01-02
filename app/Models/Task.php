@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\URL;
 
 class Task extends Model
 {
-
+    protected $guarded = [];
     public function sight()
     {
         return $this->belongsTo(Sight::class);

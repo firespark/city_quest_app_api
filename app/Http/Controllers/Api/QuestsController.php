@@ -14,21 +14,41 @@ class QuestsController extends ApiController
 {
     
 
-    public function index($city_id)
+    public function index($city_id, Request $request)
     {
-
+        $quest_ids = [];
         $quests = Quest::select('id', 'title', 'image')
                 ->where('city_id', $city_id)->withCount('sights')->get();
+
+        if ($request){
+            $user_id = User::autoriseUserByToken($request);
+
+        }
+
+        if($user_id) 
+        {
+            $quest_ids = Game::select('quest_id', 'finished')->where('user_id', $user_id)->get();
+        }
 
         if(!empty($quests))
         {
             $data = [];
             foreach ($quests as $quest) {
+                $status = null;
+                if (!empty($quest_ids))
+                {
+                    foreach ($quest_ids as $quest_id) {
+                        if ($quest_id->quest_id == $quest->id) {
+                            $status = ($quest_id->finished) ? 'finished' : 'in_progress';
+                        }
+                    }
+                }
                 $data[] = [
                     'id' => $quest->id,
                     'title' => $quest->title,
                     'image' => $quest->getImage(),
                     'sights_count' => $quest->sights_count,
+                    'status' => $status,
                     //'city' => $result->city->title,
                 ];
             }
@@ -42,21 +62,40 @@ class QuestsController extends ApiController
         return $this->response->responseData();
     }
 
-    public function featured()
+    public function featured(Request $request)
     {
-
+        $quest_ids = [];
         $quests = Quest::select('id', 'title', 'image')
                 ->where('featured', 1)->withCount('sights')->get();
+        if ($request){
+            $user_id = User::autoriseUserByToken($request);
+
+        }
+
+        if($user_id) 
+        {
+            $quest_ids = Game::select('quest_id', 'finished')->where('user_id', $user_id)->get();
+        }
 
         if(!empty($quests))
         {
             $data = [];
             foreach ($quests as $quest) {
+                $status = null;
+                if (!empty($quest_ids))
+                {
+                    foreach ($quest_ids as $quest_id) {
+                        if ($quest_id->quest_id == $quest->id) {
+                            $status = ($quest_id->finished) ? 'finished' : 'in_progress';
+                        }
+                    }
+                }
                 $data[] = [
                     'id' => $quest->id,
                     'title' => $quest->title,
                     'image' => $quest->getImage(),
                     'sights_count' => $quest->sights_count,
+                    'status' => $status,
                     //'city' => $quest->city->title,
                 ];
             }

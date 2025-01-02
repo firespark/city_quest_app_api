@@ -1,0 +1,14 @@
+main {
+    min-height: 500px;
+}
+
+.fa, .fas, .far, .fal, .fad, .fab {
+    width: 20px;
+}
+
+button.delete-button{
+    border: none;
+    background: none;
+    padding: 0;
+    color: #dc3545;
+}

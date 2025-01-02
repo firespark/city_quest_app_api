@@ -72,6 +72,9 @@ class Game extends Model
             $mode = Mode::select('title')->where('id', $game->mode_id)->first();
 
             $sight = Sight::where('quest_id', $quest_id)->where('step', $step)->first();
+            $sightData = $sight->makeSightData($status, $game->mode_id);
+            $tasksData = Task::getTasks($sight->id, $status);
+
             $max_step = $sight->getMaxStep($quest_id);
 
             if($is_finished && $step == $max_step) {
@@ -83,22 +86,22 @@ class Game extends Model
                 $data['mode_id'] = $game->mode_id;
                 $data['mode_text'] = $mode->title;
 
-                $data['sight_title'] = null;
-                $data['sight_image'] = null;
-                $data['sight_content'] = null;
-                $data['sight_address'] = null;
-                $data['sight_latitude'] = null;
-                $data['sight_longitude'] = null;
-                $data['answer1'] = null;
-                $data['answer2'] = null;
+                $data['sight_title'] = $sightData['title'];
+                $data['sight_image'] = $sightData['image'];
+                $data['sight_content'] = $sightData['content'];
+                $data['sight_address'] = $sightData['address'];
+                $data['sight_latitude'] = $sightData['latitude'];
+                $data['sight_longitude'] = $sightData['longitude'];
+                $data['answer1'] = $sightData['answer1'];
+                $data['answer2'] = $sightData['answer2'];
 
                 $data['sight_hint1'] = null;
                 $data['sight_hint2'] = null;
                 $data['show_hint'] = false;
                 $data['show_skip'] = false;
 
-                $data['task1'] = null;
-                $data['task2'] = null;
+                $data['task1'] = $tasksData['task1'];
+                $data['task2'] = $tasksData['task2'];
 
                 $data['finish'] = true;
                 $data['finish_content'] = static::getPs($quest->finish);
