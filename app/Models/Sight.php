@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\URL;
 
 class Sight extends Model
 {
+    protected $guarded = [];
 
     public function quest()
     {
@@ -42,15 +43,14 @@ class Sight extends Model
 
     
 
-    public function checkStep($step, $quest_id)
+    public static function checkStep($step, $quest_id)
     {
-        if ($this->step == $step) return $step;
 
         $is_step = static::select('id')->where('quest_id', '=', $quest_id)->where('step', '=', $step)->first();
 
 
         if ($is_step) {
-            $max_step = getMaxStep($quest_id);
+            $max_step = static::select('step')->where('quest_id', '=', $quest_id)->max('step');
             return ++$max_step;
         }
 
@@ -62,7 +62,7 @@ class Sight extends Model
     public function checkAnswer($answer, $answerNumber)
     {
         
-        $data['inputResults'] = [];
+        $data['inputResults'] = array_fill(0, count($answer), 0);;
         $errors = 0;
 
         switch ($answerNumber) {
@@ -84,28 +84,30 @@ class Sight extends Model
             {
                 $strArr = explode(',', str_replace('-', '', $arr));
                 $correct = 0;
-                if (in_array(mb_strtolower(trim(str_replace('-', '', $answer[$key]))), $strArr))
+               /*  if (in_array(mb_strtolower(trim(str_replace('-', '', $answer[$key]))), $strArr))
                     {
                         $correct = 1;
                         unset($answerArr[$key]);
                     }
-                /* 
+                */
                 foreach($answer as $answer_key => $answer_value) {
-                    if (in_array(mb_strtolower(trim($answer_value)), $strArr))
+                    
+                    if (in_array(mb_strtolower(trim(str_replace('-', '', $answer_value))), $strArr))
                     {
                         $correct = 1;
+                        $data['inputResults'][$answer_key] = $correct;
                         unset($answerArr[$key]);
                         break;
                     }
                     
-                } */
+                }
 
                 if(!$correct)
                 {
                     $errors++;
                 }
 
-                $data['inputResults'][$key] = $correct;
+                
 
             }
 

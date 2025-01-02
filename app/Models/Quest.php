@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\URL;
 
 class Quest extends Model
 {
-
+    protected $guarded = [];
 
     public function city()
     {
