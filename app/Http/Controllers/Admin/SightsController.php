@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Quest;
 use App\Models\Task;
 use App\Models\Sight;
+use App\Services\ImageService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -462,7 +463,8 @@ class SightsController extends Controller
     private function handleTaskImage($task, &$taskImage, $uploadedImage, $imageFolderPath, $step, $suffix)
     {
         if ($task->image && !$taskImage) {
-            Task::deleteTaskImage($task->image);
+            $imageService = new ImageService();
+            $imageService->deleteImage($task->image);
         }
 
         if ($uploadedImage) {
@@ -476,12 +478,13 @@ class SightsController extends Controller
     {
         $sight = Sight::find($id);
         $tasks = $sight->tasks;
+        $imageService = new ImageService();
         foreach ($tasks as $key => $task) {
-            Task::deleteTaskImage($task->image);
+            $imageService->deleteImage($task->image);
             $task->delete();
         }
         $sight->delete();
-        Task::deleteTaskImage($sight->image);
+        $imageService->deleteImage($sight->image);
 
         return redirect()->route('admin.sights.index');
     }
