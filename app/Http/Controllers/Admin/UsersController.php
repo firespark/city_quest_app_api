@@ -12,10 +12,11 @@ class UsersController extends Controller
 
     public function index()
     {
-        $users = User::all();
+        $perpage = 30;
+        $users = User::paginate($perpage);
 
 
-        return view('admin.users.index', , compact(
+        return view('admin.users.index', compact(
             'users',
         ));
     }
