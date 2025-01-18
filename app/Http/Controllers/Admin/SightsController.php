@@ -50,7 +50,15 @@ class SightsController extends Controller
         $validatedData = $request->validate([
             'title' => 'required',
             'step' => 'required',
-            'quest_id' => 'required',
+            'quest_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $quest = Quest::find($value);
+                    if (!$quest) {
+                        $fail('Выбранный квест не существует.');
+                    }
+                },
+            ],
             'image' => 'nullable|image',
             'description' => 'required',
             'address' =>'required',

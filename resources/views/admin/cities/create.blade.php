@@ -12,31 +12,31 @@
         @csrf
         <div class="mb-3">
             <label class="mb-2">Город *</label>
-            <input type="text" class="form-control" name="title" required>
+            <input type="text" class="form-control" name="title" value="{{ old('title') }}" required>
         </div>
         <div class="mb-3">
             <label class="mb-2">Слаг *</label>
-            <input type="text" class="form-control" name="slug" required>
+            <input type="text" class="form-control" name="slug" value="{{ old('slug') }}" required>
         </div>
         <div class="mb-3">
             <label class="mb-2">Контент *</label>
-            <textarea name="content" class="form-control" required></textarea>
+            <textarea name="content" class="form-control" required>{{ old('content') }}</textarea>
         </div>
         <div class="mb-3">
             <label class="mb-2" for="exampleFormControlFile1">Картинка города</label>
             <input type="file" name="image" class="form-control-file form-control" id="exampleFormControlFile1">
         </div>
         <div class="mb-3 form-group form-check">
-            <input type="checkbox" class="form-check-input" name="featured" id="exampleCheck1">
+            <input type="checkbox" class="form-check-input" name="featured" id="exampleCheck1" {{ old('featured') ? 'checked' : '' }}>
             <label class="form-check-label" for="exampleCheck1">На главной</label>
         </div>
         <div class="mb-3">
             <label for="exampleFormControlSelect1" class="mb-2">Родительский город</label>
             <select name="parent_id" class="form-select" id="exampleFormControlSelect1">
-            <option value="0">Нет</option>
-            @foreach($cities as $city)
-            <option value="{{$city->id}}">{{$city->title}}</option>
-            @endforeach
+                <option value="0" {{ old('parent_id') == 0 ? 'selected' : '' }}>Нет</option>
+                @foreach($cities as $city)
+                    <option value="{{ $city->id }}" {{ old('parent_id') == $city->id ? 'selected' : '' }}>{{ $city->title }}</option>
+                @endforeach
             </select>
         </div>
 
