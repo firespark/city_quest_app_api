@@ -37,14 +37,14 @@
                         <td>
                           <div class="d-flex">
                             <a href="/admin/sights/{{$sight->id}}/edit"><i class="far fa-edit"></i></a>&nbsp;
-<!--                             <form method="post" action="{{ route('admin.sights.destroy', $sight->id) }}">
+                            <form method="post" action="{{ route('admin.sights.destroy', $sight->id) }}">
                             @csrf
                             <input name="_method" type="hidden" value="delete">
 
                             <button onclick="return confirm('Вы уверены, что хотите удалить этот элемент?')" class="delete-button" type="submit">
                               <i class="fas fa-times-circle"></i>
                             </button>
-                            </form> -->
+                            </form>
                           </div>
                             
                          
