@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\Sight;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SightsController extends Controller
 {
@@ -145,7 +146,7 @@ class SightsController extends Controller
                 $task1Image = null;
                 if (isset($validatedData['task1_image'][$i]))
                 {
-                    $task1Image = $this->createTaskImage($validatedData['task1_image'][$i], $imageFolderPath, $validatedData['step'], "1-$type");
+                    $task1Image = Task::createTaskImage($validatedData['task1_image'][$i], $imageFolderPath, $validatedData['step'], "1-$type");
                 }
                 
                 $task1 = Task::create([
@@ -160,7 +161,7 @@ class SightsController extends Controller
         }
 
 
-        $task2ImagePath = $this->createTaskImage($request->file('task2_image'), $imageFolderPath, $validatedData['step'], '2');
+        $task2ImagePath = Task::createTaskImage($request->file('task2_image'), $imageFolderPath, $validatedData['step'], '2');
 
         $task2 = Task::create([
             'quest_id' => $validatedData['quest_id'],
@@ -171,7 +172,7 @@ class SightsController extends Controller
 
         ]);
 
-        $hint1ImagePath = $this->createTaskImage($request->file('hint1_image'), $imageFolderPath, $validatedData['step'], '3');
+        $hint1ImagePath = Task::createTaskImage($request->file('hint1_image'), $imageFolderPath, $validatedData['step'], '3');
 
         $hint1 = Task::create([
             'quest_id' => $validatedData['quest_id'],
@@ -182,7 +183,7 @@ class SightsController extends Controller
 
         ]);
 
-        $hint2ImagePath = $this->createTaskImage($request->file('hint2_image'), $imageFolderPath, $validatedData['step'], '4');
+        $hint2ImagePath = Task::createTaskImage($request->file('hint2_image'), $imageFolderPath, $validatedData['step'], '4');
 
         $hint2 = Task::create([
             'quest_id' => $validatedData['quest_id'],
@@ -256,25 +257,45 @@ class SightsController extends Controller
         ));
     }
 
-    
+        
     public function update(Request $request, $id)
     {
         $sight = Sight::find($id);
-        $validatedData = $request->validate([
+
+        $validatedData = $this->validateUpdateRequest($request);
+
+        $questSlug = Quest::select('slug')->where('id', $validatedData['quest_id'])->first()->slug;
+        [$imageFolderPath, $tripNumber] = $this->getImageFolderPath($questSlug);
+
+        $imagePath = $this->updateSightImage($request, $sight, $validatedData, $imageFolderPath);
+
+        $sight->update($this->getSightUpdateData($validatedData, $imagePath));
+
+        $this->updateTask1($validatedData, $sight, $imageFolderPath);
+        $this->updateTask2($request, $validatedData, $imageFolderPath);
+        $this->updateHint($request, $validatedData, $imageFolderPath, 'hint1');
+        $this->updateHint($request, $validatedData, $imageFolderPath, 'hint2');
+
+        return redirect()->route('admin.sights.edit', $sight->id)->with('success', 'Достопримечательность успешно отредактирована!');
+    }
+
+    private function validateUpdateRequest(Request $request)
+    {
+        return $request->validate([
             'title' => 'required',
             'step' => 'required',
             'quest_id' => 'required',
             'image' => 'nullable|image',
             'description' => 'required',
-            'address' =>'required',
-            'latitude' =>'required',
+            'address' => 'required',
+            'latitude' => 'required',
             'longitude' => 'required',
 
             'task1_id' => ['nullable', 'array'],
             'task1_text' => ['nullable', 'array'],
-            'task1_text.*' => ['nullable', 'string'], 
-            'task1_image' => ['nullable', 'array'], 
-            'task1_image.*' => ['nullable', 'image'], 
+            'task1_text.*' => ['nullable', 'string'],
+            'task1_image' => ['nullable', 'array'],
+            'task1_image.*' => ['nullable', 'image'],
             'task1_imgsrc' => ['nullable', 'array'],
             'task1_text' => [
                 function ($attribute, $value, $fail) {
@@ -297,26 +318,13 @@ class SightsController extends Controller
             'hint1_text' => ['nullable', 'string'],
             'hint1_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'hint1_imgsrc' => ['nullable', 'string'],
-            'hint1_text' => [
-                function ($attribute, $value, $fail) use ($request) {
-                    if (empty($value) && !$request->hasFile('hint1_image') && empty($request->input('hint1_imgsrc')))
-                    {
-                        $fail('Необходимо указать текст подсказки или загрузить изображение.');
-                    }
-                }
-            ],
+            'hint1_text' => $this->validateTextOrImage('hint1', $request),
 
             'task2_id' => 'required',
             'task2_text' => ['nullable', 'string'],
             'task2_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'task2_imgsrc' => ['nullable', 'string'],
-            'task2_text' => [
-                function ($attribute, $value, $fail) use ($request) {
-                    if (empty($value) && !$request->hasFile('task2_image') && empty($request->input('task2_imgsrc'))) {
-                        $fail('Необходимо указать текст вопроса 2 или загрузить изображение.');
-                    }
-                }
-            ],
+            'task2_text' => $this->validateTextOrImage('task2', $request),
 
             'answer2' => ['required', 'string', 'max:255'],
 
@@ -324,146 +332,157 @@ class SightsController extends Controller
             'hint2_text' => ['nullable', 'string'],
             'hint2_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'hint2_imgsrc' => ['nullable', 'string'],
-            'hint2_text' => [
-                function ($attribute, $value, $fail) use ($request) {
-                    if (empty($value) && !$request->hasFile('hint2_image') && empty($request->input('hint2_imgsrc'))) {
-                        $fail('Необходимо указать текст подсказки или загрузить изображение.');
-                    }
-                }
-            ],
+            'hint2_text' => $this->validateTextOrImage('hint2', $request),
         ]);
-        $quest_slug = Quest::select('slug')->where('id', $validatedData['quest_id'])->first()->slug;
+    }
 
-        $slug = explode('-', $quest_slug);
+    public function validateTextOrImage($fieldPrefix, $request)
+    {
+        return [
+            function ($attribute, $value, $fail) use ($fieldPrefix, $request) {
+                $type = strpos($fieldPrefix, 'task') !== false ? 'вопроса' : 'подсказки';
+                $number = substr($fieldPrefix, -1);  
+    
+                $message = "Необходимо указать текст {$type} {$number} или загрузить изображение.";
+    
+                if (empty($value) && !$request->hasFile("{$fieldPrefix}_image") && empty($request->input("{$fieldPrefix}_imgsrc"))) {
+                    $fail($message);
+                }
+            }
+        ];
+    }
+
+    private function getImageFolderPath($questSlug)
+    {
+        $slug = explode('-', $questSlug);
         $tripNumber = filter_var($slug[1], FILTER_SANITIZE_NUMBER_INT);
         $imageFolderPath = "/{$slug[0]}/{$slug[1]}/";
 
+        return [$imageFolderPath, $tripNumber];
+    }
+
+    private function updateSightImage(Request $request, $sight, $validatedData, $imageFolderPath)
+    {
         $imagePath = $sight->image;
+
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
             $fileName = "{$validatedData['step']}.{$extension}";
             $imagePath = "{$imageFolderPath}{$fileName}";
-    
-            $image->storeAs("public/img{$imageFolderPath}", "{$fileName}", 'public_uploads');
-        }
-        $tasksImagePath = "{$imageFolderPath}tasks/{$validatedData['step']}";
 
-        
-        $sight->update([
+            $image->storeAs("public/img{$imageFolderPath}", $fileName, 'public_uploads');
+        }
+
+        return $imagePath;
+    }
+
+    private function getSightUpdateData($validatedData, $imagePath)
+    {
+        return [
             'title' => $validatedData['title'],
             'quest_id' => $validatedData['quest_id'],
             'answer1' => mb_strtolower(trim($validatedData['answer1'])),
             'answer2' => mb_strtolower(trim($validatedData['answer2'])),
-            'step' => Sight::checkStep($validatedData['step'], $validatedData['quest_id']),
+            'step' => $validatedData['step'],
             'description' => $validatedData['description'],
             'address' => $validatedData['address'],
             'latitude' => $validatedData['latitude'],
             'longitude' => $validatedData['longitude'],
             'image' => $imagePath,
-        ]);
-        
-        for ($i=0; $i <= 2 ; $i++) { 
+        ];
+    }
+
+    private function updateTask1($validatedData, $sight, $imageFolderPath)
+    {
+        for ($i = 0; $i <= 2; $i++) {
             $type = $i + 1;
-            if ($validatedData['task1_id'][$i]) 
-            {
+            $task1Image = $validatedData['task1_imgsrc'][$i] ?? null;
+
+            if ($task1Image === '') {
+                $task1Image = null;
+            }
+
+            if ($validatedData['task1_id'][$i]) {
                 $task1 = Task::find($validatedData['task1_id'][$i]);
-                $task1Image = $validatedData['task1_imgsrc'][$i];
-                if (isset($validatedData['task1_image'][$i]))
-                {
-                    $task1Image = $this->createTaskImage($validatedData['task1_image'][$i], $imageFolderPath, $validatedData['step'], "1-$type");
-                }
+                $this->handleTaskImage($task1, $task1Image, $validatedData['task1_image'][$i] ?? null, $imageFolderPath, $validatedData['step'], "1-$type");
 
                 $task1->update([
                     'text' => $validatedData['task1_text'][$i],
                     'image' => $task1Image,
                 ]);
-            }
-            else if ($validatedData['task1_text'][$i] || isset($validatedData['task1_image'][$i]))
-            {
-                $task1Image = null;
-                if (isset($validatedData['task1_image'][$i]))
-                {
-                    $task1Image = $this->createTaskImage($validatedData['task1_image'][$i], $imageFolderPath, $validatedData['step'], "1-$type");
-                }
-                
-                $task1 = Task::create([
+            } elseif ($validatedData['task1_text'][$i] || isset($validatedData['task1_image'][$i])) {
+                $task1Image = Task::createTaskImage($validatedData['task1_image'][$i] ?? null, $imageFolderPath, $validatedData['step'], "1-$type");
+
+                Task::create([
                     'quest_id' => $validatedData['quest_id'],
                     'sight_id' => $sight->id,
                     'text' => $validatedData['task1_text'][$i],
                     'image' => $task1Image,
                     'type' => 1,
-
                 ]);
             }
         }
+    }
 
+    private function updateTask2(Request $request, $validatedData, $imageFolderPath)
+    {
         $task2 = Task::find($validatedData['task2_id']);
-        $task2Image = $validatedData['task2_imgsrc'];
-        if (isset($validatedData['task2_image']))
-        {
-            $task2Image = $this->createTaskImage($request->file('task2_image'), $imageFolderPath, $validatedData['step'], '2');
+        $task2Image = $validatedData['task2_imgsrc'] ?? null;
+
+        if ($task2Image === '') {
+            $task2Image = null;
         }
+
+        $this->handleTaskImage($task2, $task2Image, $request->file('task2_image'), $imageFolderPath, $validatedData['step'], '2');
 
         $task2->update([
             'text' => $validatedData['task2_text'],
             'image' => $task2Image,
-
         ]);
-
-
-        
-        $hint1 = Task::find($validatedData['hint1_id']);
-        $hint1Image = $validatedData['hint1_imgsrc'];
-        if (isset($validatedData['hint1_image']))
-        {
-            $hint1Image = $this->createTaskImage($request->file('hint1_image'), $imageFolderPath, $validatedData['step'], '3');
-        }
-
-        $hint1->update([
-            'text' => $validatedData['hint1_text'],
-            'image' => $hint1Image,
-
-        ]);
-
-        $hint2 = Task::find($validatedData['hint2_id']);
-        $hint2Image = $validatedData['hint2_imgsrc'];
-        if (isset($validatedData['hint2_image']))
-        {
-            $hint1Image = $this->createTaskImage($request->file('hint2_image'), $imageFolderPath, $validatedData['step'], '4');
-        }
-
-        $hint2->update([
-            'text' => $validatedData['hint2_text'],
-            'image' => $hint2Image,
-
-        ]);
-
-
-        return redirect()->route('admin.sights.edit', $sight->id)->with('success', 'Достопримечательность успешно отредактирована!');; 
-
-
     }
+
+    private function updateHint(Request $request, $validatedData, $imageFolderPath, $hintKey)
+    {
+        $hint = Task::find($validatedData["{$hintKey}_id"]);
+        $hintImage = $validatedData["{$hintKey}_imgsrc"] ?? null;
+
+        if ($hintImage === '') {
+            $hintImage = null;
+        }
+
+        $this->handleTaskImage($hint, $hintImage, $request->file("{$hintKey}_image"), $imageFolderPath, $validatedData['step'], $hintKey === 'hint1' ? '3' : '4');
+
+        $hint->update([
+            'text' => $validatedData["{$hintKey}_text"],
+            'image' => $hintImage,
+        ]);
+    }
+
+    private function handleTaskImage($task, &$taskImage, $uploadedImage, $imageFolderPath, $step, $suffix)
+    {
+        if ($task->image && !$taskImage) {
+            Task::deleteTaskImage($task->image);
+        }
+
+        if ($uploadedImage) {
+            $taskImage = Task::createTaskImage($uploadedImage, $imageFolderPath, $step, $suffix);
+        }
+    }
+
 
     
     public function destroy($id)
     {
-        Sight::find($id)->remove();
-
+        $sight = Sight::find($id);
+        $tasks = $sight->tasks;
+        foreach ($tasks as $key => $task) {
+            Task::deleteTaskImage($task->image);
+            $task->delete();
+        }
+        $sight->delete();
+        Task::deleteTaskImage($sight->image);
 
         return redirect()->route('admin.sights.index');
-    }
-
-    protected function createTaskImage($image, $imageFolderPath, $step, $type)
-    {
-        $imagePath = null;
-        if ($image) {
-            $extension = $image->getClientOriginalExtension();
-            $fileName = "{$step}-{$type}.{$extension}";
-            $imagePath = "{$imageFolderPath}tasks/{$fileName}";
-    
-            $image->storeAs("public/img{$imageFolderPath}tasks/", "{$fileName}", 'public_uploads');
-        }
-        return $imagePath;
     }
 }

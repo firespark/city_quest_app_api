@@ -104,4 +104,25 @@ class Task extends Model
 
     }
 
+    public function createTaskImage($image, $imageFolderPath, $step, $type)
+    {
+        $imagePath = null;
+        if ($image) {
+            $extension = $image->getClientOriginalExtension();
+            $fileName = "{$step}-{$type}.{$extension}";
+            $imagePath = "{$imageFolderPath}tasks/{$fileName}";
+    
+            $image->storeAs("public/img{$imageFolderPath}tasks/", "{$fileName}", 'public_uploads');
+        }
+        return $imagePath;
+    }
+
+    public function deleteTaskImage($image) {
+        $imagePath = "public/img" . $image;
+        print_r($imagePath);
+        if (Storage::disk('public_uploads')->exists($imagePath)) {
+            Storage::disk('public_uploads')->delete($imagePath);
+        }
+    }
+
 }
