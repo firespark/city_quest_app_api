@@ -1,95 +1,66 @@
-# Test Reality City Quest Application API (Source Code)
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
-## Requirements
+<p align="center">
+<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-* PHP version 7.4 or greater.
-* MySQL version 8.0 or greater OR MariaDB version 10.5 or greater.
-* HTTPS support
+## About Laravel
 
-## Description
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-Source Code for Test Reality City Quest Application API. 
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-It is interactive game, where players need to read riddles, recognise sightseeings and walk city tour. 
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-Done with Laravel.
+## Learning Laravel
 
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-## API Methods
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-post:  /api/auth/login - player login
+## Laravel Sponsors
 
-post:  /api/auth/logout - player logout
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
 
-post:  /api/auth/checkEmail - check player's email
+### Premium Partners
 
-post:  /api/auth/sendCode - send activation code to a player
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Cubet Techno Labs](https://cubettech.com)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[Many](https://www.many.co.uk)**
+- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
+- **[DevSquad](https://devsquad.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[OP.GG](https://op.gg)**
+- **[CMS Max](https://www.cmsmax.com/)**
+- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
+- **[Lendio](https://lendio.com)**
+- **[Romega Software](https://romegasoftware.com)**
 
-post:  /api/auth/checkCode - check player's activation code
+## Contributing
 
-post:  /api/auth/changePassword - change players answer
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
+## Code of Conduct
 
-get:  /api/cities/all - cities list
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-get:  /api/cities/featured - featured cities list
+## Security Vulnerabilities
 
-post:  /api/cities/search - search a city
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## License
 
-post:  /api/contacts/send - send message using contacts form
-
-
-get:  /api/games/get/{quest_id} - get game process by quest id
-
-get:  /api/games/next/{quest_id} - get next stage/level
-
-post:  /api/games/checkAnswer/{quest_id} - check player's answer
-
-get:  /api/games/getHint/{quest_id} - get hint
-
-post:  /api/games/getSkip/{quest_id} - get available number of skips
-
-post:  /api/games/setMode/{quest_id} - set game mode
-
-get:  /api/games/getLevel/{quest_id}/{level} - get current game level
-
-
-get:  /api/modes/ - modes list
-
-
-get:  /api/pages/about - about project text
-
-get:  /api/pages/howPlay - how play text
-
-
-get:  /api/quests/all/{city_id} - quests list by city id
-
-get:  /api/quests/featured - featured quests list
-
-get:  /api/quests/get/{id} - get quest by id
-
-get:  /api/quests/done - finished quests list
-
-get:  /api/quests/opened - opened quests list
-
-
-get:  /api/users/get - get current authorised player
-
-post:  /api/users/saveName - save player's name
-
-post:  /api/users/saveNotes - save player's notifications mode (true/false)
-
-post:  /api/users/savePassword - save player's password
-
-
-## Changelog
-
-### 1.0
-* Released: November 16, 2022
-
-### 2.0
-* Released: July 22, 2023
-  
-### 3.0
-* Released: December 12, 2024
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

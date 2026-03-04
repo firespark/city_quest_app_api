@@ -52,7 +52,7 @@ return [
     |
     */
 
-    //'url' => env('APP_URL', ''),
+    'url' => env('APP_URL', 'https://test2.gagara-web.ru'),
 
     'asset_url' => env('ASSET_URL', null),
 

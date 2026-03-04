@@ -49,21 +49,31 @@ Route::group(['middleware' => 'auth', 'namespace' => 'App\Http\Controllers'], fu
 
 Route::group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers\Admin', 'middleware' => 'admin'], function() {
     Route::get('/', 'DashboardController@index')->name('admin.dashboard');
-     Route::resource('/cities', 'CitiesController', [
+    Route::resource('/cities', 'CitiesController', [
         'as' => 'admin'
     ]);
+
     Route::resource('/users', 'UsersController', [
         'as' => 'admin'
     ]);
+
+    Route::resource('/games', 'GamesController', [
+        'as' => 'admin'
+    ])->only(['index']);
+    Route::get('/games/{user_id?}', 'GamesController@user')->name('admin.games.user');
+
     Route::resource('/quests', 'QuestsController', [
         'as' => 'admin'
     ]);
+
     Route::get('/city/{city_id}/quests', 'QuestsController@city')->name('admin.quests.city');
 
     Route::get('/sights/create/{quest_id?}', 'SightsController@create')->name('admin.sights.create');
+
     Route::resource('/sights', 'SightsController', [
         'as' => 'admin'
-    ])->only(['index', 'store', 'show', 'edit', 'update', 'destroy']);;
+    ])->only(['index', 'store', 'show', 'edit', 'update', 'destroy']);
+
     Route::get('/quest/{quest_id}/sights', 'SightsController@quest')->name('admin.sights.quest');
    
 
