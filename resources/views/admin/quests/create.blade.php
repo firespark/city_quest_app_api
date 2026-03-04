@@ -6,7 +6,7 @@
         <div class="h4">Добавить квест</div>
     </div>
 
-    @include('admin.errors')
+    @include('admin.alerts')
     <form 
         class="w-75" 
         method="post" 
@@ -75,6 +75,17 @@
             <label class="mb-2">Количество подсказок</label>
             <input type="number" class="form-control" name="hints_number" value="{{ old('hints_number', 3) }}">
         </div>
+        
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="questShown" name="published" {{ old('published') ? 'checked' : '' }}>
+            <label class="form-check-label" for="questShown">Опубликован</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="questPaid" name="paid" {{ old('paid') ? 'checked' : '' }}>
+            <label class="form-check-label" for="questPaid">Платный</label>
+        </div>
+
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
   

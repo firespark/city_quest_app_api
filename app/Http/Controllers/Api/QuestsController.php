@@ -18,7 +18,10 @@ class QuestsController extends ApiController
     {
         $quest_ids = [];
         $quests = Quest::select('id', 'title', 'image')
-                ->where('city_id', $city_id)->withCount('sights')->get();
+                ->where('city_id', $city_id)
+                ->where('published', 1)
+                ->withCount('sights')
+                ->get();
 
         if ($request){
             $user_id = User::autoriseUserByToken($request);
@@ -66,7 +69,10 @@ class QuestsController extends ApiController
     {
         $quest_ids = [];
         $quests = Quest::select('id', 'title', 'image')
-                ->where('featured', 1)->withCount('sights')->get();
+                ->where('featured', 1)
+                ->where('published', 1)
+                ->withCount('sights')
+                ->get();
         if ($request){
             $user_id = User::autoriseUserByToken($request);
 
@@ -108,43 +114,57 @@ class QuestsController extends ApiController
 
         return $this->response->responseData();
     }
-
-    public function get($id)
+    
+    public function get($id, Request $request)
     {
-
         $quest = Quest::select('id', 'title', 'image', 'content', 'city_id', 'start_point', 'end_point')
-            ->where('id', $id)->withCount('sights')->first();
+            ->where('id', $id)
+            ->where('published', 1)
+            ->withCount('sights')
+            ->first();
 
         if(!empty($quest))
         {
+            $status = null;
+            $user_id = null;
+
+            if ($request) {
+                $user_id = User::autoriseUserByToken($request);
+            }
+
+            if ($user_id) {
+                $game = Game::where('user_id', $user_id)
+                            ->where('quest_id', $quest->id)
+                            ->first();
+                if ($game) {
+                    $status = ($game->finished) ? 'finished' : 'in_progress';
+                }
+            }
 
             $data = [
                 'id' => $quest->id,
                 'title' => $quest->title,
-                'image' => $quest->getImage(), 
-                'content' => $quest->getPs(), 
+                'image' => $quest->getImage(),
+                'content' => $quest->getPs(),
                 'city_id' => $quest->city_id,
                 'city' => $quest->city->title,
-                'start_point' => $quest->start_point, 
+                'start_point' => $quest->start_point,
                 'end_point' => $quest->end_point,
-                'sights_count' => $quest->sights_count, 
+                'sights_count' => $quest->sights_count,
+                'status' => $status,  // <- Добавили статус для текущего пользователя
             ];
 
             $this->response->setData($data);
             $this->response->toggleSuccess();
-
         }
         else
         {
             $this->response->setStatus(404);
         }
 
-        
-        
         return $this->response->responseData();
-
-
     }
+
 
     public function done(Request $request)
     {

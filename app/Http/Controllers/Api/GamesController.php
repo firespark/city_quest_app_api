@@ -324,7 +324,10 @@ class GamesController extends ApiController
                                 $game->status = 2;
                                 break;
                         }
-
+                        if($game->is_finish($quest_id, $game->step, $game->status))
+                        {
+                            $game->finished = 1;
+                        }
                         $game->skips_number--;
 
 

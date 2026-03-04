@@ -6,7 +6,7 @@
         <div class="h4">Добавить город</div>
     </div>
 
-    @include('admin.errors')
+    @include('admin.alerts')
 
     <form class="w-75" method="post" action="{{ route('admin.cities.store') }}" enctype="multipart/form-data">
         @csrf
@@ -39,7 +39,10 @@
                 @endforeach
             </select>
         </div>
-
+        <div class="mb-3">
+            <label class="mb-2">Карта с достопримечательностями</label>
+            <input type="text" class="form-control" value="{{ old('map') }}" name="map">
+        </div>
         <button type="submit" class="btn btn-primary">Добавить</button>
     </form>
 @endsection

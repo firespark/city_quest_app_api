@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Game;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+
+
 
 class UsersController extends Controller
 {
@@ -14,7 +17,7 @@ class UsersController extends Controller
     {
         $perpage = 30;
         $users = User::paginate($perpage);
-
+        $gamesCount = [];
 
         return view('admin.users.index', compact(
             'users',

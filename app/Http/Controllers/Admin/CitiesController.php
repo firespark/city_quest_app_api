@@ -26,7 +26,7 @@ class CitiesController extends Controller
             'cities',
         ));
     }
-/* 
+/*
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -45,8 +45,9 @@ class CitiesController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif',
             'featured' => 'nullable',
             'parent_id' => 'nullable|integer',
+            'map' => 'nullable|string|max:512',
         ]);
-    
+
         // Определяем путь для загрузки картинки
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -54,11 +55,11 @@ class CitiesController extends Controller
             $slug = $validatedData['slug'];
             $extension = $image->getClientOriginalExtension();
             $imagePath = "/{$slug}/{$slug}.{$extension}";
-    
+
             // Сохраняем файл в public/img/slug
             $image->storeAs("public/img/{$slug}", "{$slug}.{$extension}", 'public_uploads');
         }
-    
+
         // Сохраняем данные в базу
         $city = City::create([
             'title' => $validatedData['title'],
@@ -67,8 +68,9 @@ class CitiesController extends Controller
             'image' => $imagePath,
             'featured' => $request->has('featured'),
             'parent_id' => $validatedData['parent_id'] ?? 0,
+            'map' => $validatedData['map'],
         ]);
-    
+
         // Перенаправляем с успешным сообщением
         return redirect()->route('admin.cities.index')->with('success', 'Город успешно добавлен!');
     }
@@ -96,8 +98,9 @@ class CitiesController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif',
             'featured' => 'nullable',
             'parent_id' => 'nullable|integer',
+            'map' => 'nullable|string|max:512',
         ]);
-    
+
         // Определяем путь для загрузки картинки
         $imagePath = $city->image;
         if ($request->hasFile('image')) {
@@ -105,7 +108,7 @@ class CitiesController extends Controller
             $slug = $validatedData['slug'];
             $extension = $image->getClientOriginalExtension();
             $imagePath = "/{$slug}/{$slug}.{$extension}";
-    
+
             // Сохраняем файл в public/img/slug
             $image->storeAs("public/img/{$slug}", "{$slug}.{$extension}", 'public_uploads');
         }
@@ -117,6 +120,7 @@ class CitiesController extends Controller
             'image' => $imagePath,
             'featured' => $request->has('featured'),
             'parent_id' => $validatedData['parent_id'] ?? 0,
+            'map' => $validatedData['map'],
         ]);
 
         return redirect()->route('admin.cities.edit', $id)->with('success', 'Город успешно отредактирован!');

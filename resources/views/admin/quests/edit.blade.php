@@ -8,7 +8,7 @@
     <div class="mb-4">
         <div class="h5"><a href="{{route('admin.quests.city', ['city_id' => $city->id])}}">Квесты в городе {{$city->title}}</a></div>
     </div>
-    @include('admin.errors')
+    @include('admin.alerts')
 
     <form 
         class="w-75" 
@@ -81,6 +81,17 @@
             <label class="mb-2">Количество подсказок</label>
             <input type="number" class="form-control" name="hints_number" value="{{$quest->hints_number}}">
         </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="questShown" name="published"{{($quest->published == 1) ? ' checked' : ''}}>
+            <label class="form-check-label" for="questShown">Опубликован</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="questPaid" name="paid"{{($quest->paid == 1) ? ' checked' : ''}}>
+            <label class="form-check-label" for="questPaid">Платный</label>
+        </div>
+
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
 @endsection

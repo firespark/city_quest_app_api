@@ -14,6 +14,7 @@
                       <tr>
                         <th scope="col">#</th>
                         <th scope="col">Заголовок</th>
+                        <th scope="col">Карта</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>
@@ -22,6 +23,12 @@
                       <tr>
                         <th scope="row">{{$city->id}}</th>
                         <td><a href="{{route('admin.quests.city', ['city_id' => $city->id])}}">{{$city->title}}</a></td>
+                        <td>    @if($city->map)
+                              <a href="{{ $city->map }}" target="_blank">Карта</a>
+                          @else
+                              Нет
+                          @endif
+                        </td>
                         <td>
                           <div class="d-flex">
                             <a href="{{route('admin.cities.edit', $city->id)}}"><i class="far fa-edit"></i></a>&nbsp;

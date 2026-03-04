@@ -63,9 +63,10 @@ class QuestsController extends Controller
             'end_point' => 'nullable|string|max:255',
             'skips_number' => 'nullable|integer',
             'hints_number' => 'nullable|integer',
+            'published' => 'nullable',
+            'paid' => 'nullable',
         ]);
     
-        // Определяем путь для загрузки картинки
         $imagePath = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
@@ -74,11 +75,9 @@ class QuestsController extends Controller
             $tripNumber = filter_var($slug[1], FILTER_SANITIZE_NUMBER_INT);
             $imagePath = "/{$slug[0]}/{$slug[1]}/quest{$tripNumber}.{$extension}";
     
-            // Сохраняем файл в public/img/slug
             $image->storeAs("public/img/{$slug[0]}/{$slug[1]}/", "quest{$tripNumber}.{$extension}", 'public_uploads');
         }
     
-        // Сохраняем данные в базу
         $quest = Quest::create([
             'title' => $validatedData['title'],
             'slug' => $validatedData['slug'],
@@ -91,9 +90,10 @@ class QuestsController extends Controller
             'end_point' => $validatedData['end_point'],
             'skips_number' => $validatedData['skips_number'],
             'hints_number' => $validatedData['hints_number'],
+            'published' => $request->has('published'),
+            'paid' => $request->has('paid'),
         ]);
     
-        // Перенаправляем с успешным сообщением
         return redirect()->route('admin.quests.edit', $quest->id)->with('success', 'Квест успешно отредактирован!');
     }
 
@@ -141,9 +141,10 @@ class QuestsController extends Controller
             'end_point' => 'nullable|string|max:255',
             'skips_number' => 'nullable|integer',
             'hints_number' => 'nullable|integer',
+            'published' => 'nullable',
+            'paid' => 'nullable',
         ]);
     
-        // Определяем путь для загрузки картинки
         $imagePath = $quest->image;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
@@ -156,7 +157,6 @@ class QuestsController extends Controller
             $image->storeAs("public/img/{$slug[0]}/{$slug[1]}/", "quest{$tripNumber}.{$extension}", 'public_uploads');
         }
     
-        // Сохраняем данные в базу
         $quest->update([
             'title' => $validatedData['title'],
             'slug' => $validatedData['slug'],
@@ -169,9 +169,10 @@ class QuestsController extends Controller
             'end_point' => $validatedData['end_point'],
             'skips_number' => $validatedData['skips_number'],
             'hints_number' => $validatedData['hints_number'],
+            'published' => $request->has('published'),
+            'paid' => $request->has('paid'),
         ]);
     
-        // Перенаправляем с успешным сообщением
         return redirect()->route('admin.quests.edit', $id)->with('success', 'Квест успешно отредактирован!');
     }
 

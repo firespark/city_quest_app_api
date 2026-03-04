@@ -6,7 +6,7 @@
         <div class="h4">Редактировать тег</div>
     </div>
 
-    @include('admin.errors')
+    @include('admin.alerts')
 
     <form class="w-75" method="post" action="{{ route('admin.tags.update', $tag->id) }}" autocomplete="off">
         @csrf

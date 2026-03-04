@@ -6,13 +6,13 @@
         <div class="h4">Редактировать город</div>
     </div>
 
-    @include('admin.errors')
+    @include('admin.alerts')
 
-    <form 
-        class="w-75" 
-        method="post" 
-        action="{{ route('admin.cities.update', $city->id) }}" 
-        autocomplete="off"  
+    <form
+        class="w-75"
+        method="post"
+        action="{{ route('admin.cities.update', $city->id) }}"
+        autocomplete="off"
         enctype="multipart/form-data"
     >
         @csrf
@@ -35,9 +35,9 @@
             <input type="file" name="image" class="form-control-file form-control" id="exampleFormControlFile1">
         </div>
         <div class="mb-3 form-group form-check">
-            <input 
-                type="checkbox" 
-                lass="form-check-input" 
+            <input
+                type="checkbox"
+                lass="form-check-input"
                 name="featured"
                 id="exampleCheck1"
                 {{ $city->featured ? 'checked' : null }}
@@ -49,12 +49,16 @@
             <select name="parent_id" class="form-select select2" id="exampleFormControlSelect1">
             <option value="0">Нет</option>
             @foreach($cities as $c)
-            <option 
+            <option
                 value="{{$c->id}}"
                 {{ $city->parent_id == $c->id ? 'selected' : null }}
             >{{$c->title}}</option>
             @endforeach
             </select>
+        </div>
+        <div class="mb-3">
+            <label class="mb-2">Карта с достопримечательностями</label>
+            <input type="text" class="form-control" value="{{$city->map}}" name="map">
         </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>

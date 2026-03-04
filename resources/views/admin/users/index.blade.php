@@ -16,16 +16,20 @@
                         <th scope="col">Имя</th>
                         <th scope="col">Email</th>
                         <th scope="col">Роль</th>
+                        <th scope="col">Игры</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach($users as $user)
+                      @foreach($users as $key => $user)
                       <tr>
                         <th scope="row">{{$user->id}}</th>
                         <td>{{$user->name}}</td>
                         <td>{{$user->email}}</td>
                         <td>{{$user->role}}</td>
+                        <td>
+                        <a href="{{route('admin.games.user', ['user_id' => $user->id])}}">{{$user->games->count()}}</a>
+                        </td>
                         <td>
                           <div class="d-flex">
                             <a href="{{route('admin.users.edit', $user->id)}}"><i class="far fa-edit"></i></a>&nbsp;

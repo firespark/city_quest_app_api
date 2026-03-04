@@ -12,7 +12,7 @@
             <div class="row">
                 <div class="col-lg-6 mx-auto">
                     <div class="form">
-                        @include('admin.errors')
+                        @include('admin.alerts')
                         <div class="sendmessage"></div>
                         <div class="errormessage"></div>
                         <form role="form" class="contactForm" id="loginUser" method="post" action="/login">

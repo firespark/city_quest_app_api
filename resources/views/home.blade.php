@@ -227,7 +227,7 @@
                 <h2 class="h1">Будь в курсе</h2>
                 <div class="h3">Подпишись на новые квесты</div>
                 <div class="row">
-                    @include('admin.errors')
+                    @include('admin.alerts')
                     <div id="sendmessage"></div>
                     <div id="errormessage"></div>
                         <form role="form" class="contactForm" id="subscribeQuests" action="/subscribe" method="post">
