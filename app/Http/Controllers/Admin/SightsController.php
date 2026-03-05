@@ -250,7 +250,7 @@ class SightsController extends Controller
             'title' => 'required',
             'step' => 'required',
             'quest_id' => 'required',
-            'image' => 'nullable|string', // Теперь это строка, а не картинка
+            'image' => 'nullable|string',
             'description' => 'required',
             'address' => 'required',
             'latitude' => 'required',
@@ -260,7 +260,7 @@ class SightsController extends Controller
             'task1_text' => ['nullable', 'array'],
             'task1_text.*' => ['nullable', 'string'],
             'task1_image' => ['nullable', 'array'],
-            'task1_image.*' => ['nullable', 'string'], // Теперь это строка
+            'task1_image.*' => ['nullable', 'string'],
             'task1_text' => [
                 function ($attribute, $value, $fail) {
                     $texts = request()->input('task1_text', []);

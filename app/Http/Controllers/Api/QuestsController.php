@@ -12,88 +12,84 @@ use Illuminate\Http\Request;
 
 class QuestsController extends ApiController
 {
-    
+
 
     public function index($city_id, Request $request)
     {
-        $quest_ids = [];
-        $quests = Quest::select('id', 'title', 'image')
-                ->where('city_id', $city_id)
-                ->where('published', 1)
-                ->withCount('sights')
-                ->get();
-
-        if ($request){
+        $user = null;
+        if ($request) {
             $user_id = User::autoriseUserByToken($request);
-
+            $user = User::find($user_id);
         }
 
-        if($user_id) 
-        {
-            $quest_ids = Game::select('quest_id', 'finished')->where('user_id', $user_id)->get();
+        $quests = Quest::select('id', 'title', 'image', 'paid')
+            ->where('city_id', $city_id)
+            ->when(!$user || $user->role != 1, function ($query) {
+                return $query->where('published', 1);
+            })
+            ->withCount('sights')
+            ->get();
+
+        $quest_ids = [];
+        if ($user) {
+            $quest_ids = Game::select('quest_id', 'finished')->where('user_id', $user->id)->get();
         }
 
-        if(!empty($quests))
-        {
+        if ($quests->isNotEmpty()) {
             $data = [];
             foreach ($quests as $quest) {
                 $status = null;
-                if (!empty($quest_ids))
-                {
-                    foreach ($quest_ids as $quest_id) {
-                        if ($quest_id->quest_id == $quest->id) {
-                            $status = ($quest_id->finished) ? 'finished' : 'in_progress';
-                        }
+                foreach ($quest_ids as $q_id) {
+                    if ($q_id->quest_id == $quest->id) {
+                        $status = ($q_id->finished) ? 'finished' : 'in_progress';
                     }
                 }
+
                 $data[] = [
                     'id' => $quest->id,
                     'title' => $quest->title,
                     'image' => $quest->getImage(),
                     'sights_count' => $quest->sights_count,
                     'status' => $status,
-                    //'city' => $result->city->title,
+                    'paid' => (bool) $quest->paid,
                 ];
             }
 
             $this->response->setData($data);
             $this->response->toggleSuccess();
-
         }
-        
 
         return $this->response->responseData();
     }
 
     public function featured(Request $request)
     {
-        $quest_ids = [];
-        $quests = Quest::select('id', 'title', 'image')
-                ->where('featured', 1)
-                ->where('published', 1)
-                ->withCount('sights')
-                ->get();
-        if ($request){
+        $user = null;
+        if ($request) {
             $user_id = User::autoriseUserByToken($request);
-
+            $user = User::find($user_id);
         }
 
-        if($user_id) 
-        {
-            $quest_ids = Game::select('quest_id', 'finished')->where('user_id', $user_id)->get();
+        $quests = Quest::select('id', 'title', 'image', 'paid')
+            ->where('featured', 1)
+            ->when(!$user || $user->role != 1, function ($query) {
+                return $query->where('published', 1);
+            })
+            ->withCount('sights')
+            ->get();
+
+        $quest_ids = [];
+        if ($user) {
+            $quest_ids = Game::select('quest_id', 'finished')->where('user_id', $user->id)->get();
         }
 
-        if(!empty($quests))
-        {
+        if ($quests->isNotEmpty()) {
             $data = [];
             foreach ($quests as $quest) {
                 $status = null;
-                if (!empty($quest_ids))
-                {
-                    foreach ($quest_ids as $quest_id) {
-                        if ($quest_id->quest_id == $quest->id) {
-                            $status = ($quest_id->finished) ? 'finished' : 'in_progress';
-                        }
+                foreach ($quest_ids as $q_id) {
+                    if ($q_id->quest_id == $quest->id) {
+                        $status = ($q_id->finished) ? 'finished' : 'in_progress';
                     }
                 }
                 $data[] = [
@@ -102,40 +98,39 @@ class QuestsController extends ApiController
                     'image' => $quest->getImage(),
                     'sights_count' => $quest->sights_count,
                     'status' => $status,
-                    //'city' => $quest->city->title,
+                    'paid' => (bool) $quest->paid,
                 ];
             }
 
             $this->response->setData($data);
             $this->response->toggleSuccess();
-
         }
-        
 
         return $this->response->responseData();
     }
-    
+
     public function get($id, Request $request)
     {
+        $user = null;
+        if ($request) {
+            $user_id = User::autoriseUserByToken($request);
+            $user = User::find($user_id);
+        }
+
         $quest = Quest::select('id', 'title', 'image', 'content', 'city_id', 'start_point', 'end_point')
             ->where('id', $id)
-            ->where('published', 1)
+            ->when(!$user || $user->role != 1, function ($query) {
+                return $query->where('published', 1);
+            })
             ->withCount('sights')
             ->first();
 
-        if(!empty($quest))
-        {
+        if (!empty($quest)) {
             $status = null;
-            $user_id = null;
-
-            if ($request) {
-                $user_id = User::autoriseUserByToken($request);
-            }
-
-            if ($user_id) {
-                $game = Game::where('user_id', $user_id)
-                            ->where('quest_id', $quest->id)
-                            ->first();
+            if ($user) {
+                $game = Game::where('user_id', $user->id)
+                    ->where('quest_id', $quest->id)
+                    ->first();
                 if ($game) {
                     $status = ($game->finished) ? 'finished' : 'in_progress';
                 }
@@ -151,14 +146,12 @@ class QuestsController extends ApiController
                 'start_point' => $quest->start_point,
                 'end_point' => $quest->end_point,
                 'sights_count' => $quest->sights_count,
-                'status' => $status,  // <- Добавили статус для текущего пользователя
+                'status' => $status,
             ];
 
             $this->response->setData($data);
             $this->response->toggleSuccess();
-        }
-        else
-        {
+        } else {
             $this->response->setStatus(404);
         }
 
@@ -171,21 +164,19 @@ class QuestsController extends ApiController
 
         $user_id = User::autoriseUserByToken($request);
 
-        if($user_id) 
-        {
+        if ($user_id) {
             $games = Game::select('quest_id', 'step', 'mode_id')->where('user_id', $user_id)->where('finished', 1)->get();
-            
-            if(!empty($games))
-            {
+
+            if (!empty($games)) {
 
                 $data = [];
 
-                foreach($games as $game) {
+                foreach ($games as $game) {
                     $quest = Quest::select(
                         'id',
                         'title',
                         'image',
-                        'city_id', 
+                        'city_id',
                     )->where('id', $game->quest_id)->first();
 
                     $data[] = $quest->getData($game->step, $game->mode_id);
@@ -195,11 +186,8 @@ class QuestsController extends ApiController
                 $this->response->setData($data);
                 $this->response->toggleSuccess();
             }
-            
-        }
 
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
@@ -211,21 +199,19 @@ class QuestsController extends ApiController
 
         $user_id = User::autoriseUserByToken($request);
 
-        if($user_id) 
-        {
+        if ($user_id) {
             $games = Game::select('quest_id', 'step', 'mode_id')->where('user_id', $user_id)->where('finished', 0)->get();
-            
-            if(!empty($games))
-            {
+
+            if (!empty($games)) {
 
                 $data = [];
 
-                foreach($games as $game) {
+                foreach ($games as $game) {
                     $quest = Quest::select(
                         'id',
                         'title',
                         'image',
-                        'city_id', 
+                        'city_id',
                     )->where('id', $game->quest_id)->first();
 
                     $data[] = $quest->getData($game->step, $game->mode_id);
@@ -235,11 +221,8 @@ class QuestsController extends ApiController
                 $this->response->setData($data);
                 $this->response->toggleSuccess();
             }
-            
-        }
 
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 

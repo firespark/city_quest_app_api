@@ -2,13 +2,58 @@ main {
     min-height: 500px;
 }
 
-.fa, .fas, .far, .fal, .fad, .fab {
+.fa,
+.fas,
+.far,
+.fal,
+.fad,
+.fab {
     width: 20px;
 }
 
-button.delete-button{
+.cursor-pointer {
+    cursor: pointer;
+}
+
+button.delete-button {
     border: none;
     background: none;
     padding: 0;
     color: #dc3545;
+}
+
+.quest-badge {
+    background-color: #17A2B8;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.quest-badge .remove-quest {
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.quest-badge .remove-quest:hover {
+    opacity: 1;
+}
+
+.quest-item:hover {
+    background-color: #f8f9fa;
+}
+
+.selected-quests {
+    gap: 8px;
+}
+
+.quests-container {
+    max-height: 450px;
+    overflow-y: auto;
 }

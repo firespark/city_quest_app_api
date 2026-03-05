@@ -7,7 +7,7 @@
     <link href="/admin_assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="/admin_assets/css/select2.min.css" rel="stylesheet">
     <link href="/admin_assets/fonts/fontawesome/css/all.css" rel="stylesheet">
-    <link href="/admin_assets/css/admin.css" rel="stylesheet">
+    <link href="/admin_assets/css/admin.css?v={{ time() }}" rel="stylesheet">
 
 </head>
 <body>

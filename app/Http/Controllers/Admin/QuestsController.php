@@ -153,7 +153,6 @@ class QuestsController extends Controller
             $tripNumber = filter_var($slug[1], FILTER_SANITIZE_NUMBER_INT);
             $imagePath = "/{$slug[0]}/{$slug[1]}/quest{$tripNumber}.{$extension}";
     
-            // Сохраняем файл в public/img/slug
             $image->storeAs("public/img/{$slug[0]}/{$slug[1]}/", "quest{$tripNumber}.{$extension}", 'public_uploads');
         }
     

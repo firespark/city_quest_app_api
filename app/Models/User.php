@@ -38,25 +38,30 @@ class User extends Authenticatable
         return $this->hasMany(Token::class);
     }
 
+    public function purchasedQuests()
+    {
+        return $this->belongsToMany(Quest::class, 'user_quests', 'user_id', 'quest_id');
+    }
+
     protected static function boot()
     {
         parent::boot();
 
         static::deleting(function ($user) {
             $user->games()->each(function ($game) {
-                $game->delete(); 
+                $game->delete();
             });
         });
     }
 
-    
+
     public function createToken()
     {
 
         return Str::random(77) . time();
 
     }
-    
+
     public static function add($api_token)
     {
 
@@ -65,7 +70,7 @@ class User extends Authenticatable
         $user->password = bcrypt(Str::random(10) . time());
         $user->active = 1;
         $user->token = $api_token;
-        
+
         $user->save();
 
         return $user;
@@ -79,19 +84,16 @@ class User extends Authenticatable
 
         $token = $request->bearerToken();
 
-        if($token)
-        {
-            
+        if ($token) {
+
             $api_token = hash('sha256', $token);
 
             $user = static::select('id')
-                    ->where('token', $api_token)->where('active', 1)->first();
+                ->where('token', $api_token)->where('active', 1)->first();
 
-            if($user)
-            {
+            if ($user) {
                 return $user->id;
-            }
-            else {
+            } else {
 
                 $user = static::add($api_token);
 

@@ -218,10 +218,8 @@ class UsersController extends ApiController
                     if (!empty($modes_arr)){
                         $max_value = max($modes_arr);
 
-                        // Найти все ключи с этим значением
                         $keys_with_max_value = array_keys($modes_arr, $max_value);
 
-                        // Найти наибольший ключ
                         $max_key = max($keys_with_max_value);
                         $status = $max_key;
                     }
