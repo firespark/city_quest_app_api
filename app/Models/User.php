@@ -33,10 +33,10 @@ class User extends Authenticatable
         return $this->hasMany(Game::class);
     }
 
-    public function tokens()
+    /*public function tokens()
     {
         return $this->hasMany(Token::class);
-    }
+    }*/
 
     public function purchasedQuests()
     {
@@ -102,6 +102,24 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    public function hasQuestAccess($quest_id)
+    {
+        if ($this->role == 1) {
+            return true;
+        }
+
+        $quest = Quest::find($quest_id);
+        if (!$quest) {
+            return false;
+        }
+
+        if (!$quest->paid) {
+            return true;
+        }
+
+        return $this->purchasedQuests()->where('quest_id', $quest_id)->exists();
     }
 
 }

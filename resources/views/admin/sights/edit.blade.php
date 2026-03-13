@@ -38,11 +38,11 @@
         <div class="mb-3">
             <label class="mb-2 w-100">Изображение</label>
             @if($sight->image)
-                <img src="{{ str_starts_with($sight->image, 'http') ? $sight->image : '/img/' . $sight->image }}" id="main_img"
+                <img src="/img/{{ $sight->image }}" id="main_img"
                     alt="" class="mb-2 border border-1" width="500px">
             @endif
             <input class="form-control" type="text" name="image" id="main_input" value="{{$sight->image}}"
-                placeholder="URL или путь к изображению">
+                placeholder="Путь к изображению">
 
         </div>
 

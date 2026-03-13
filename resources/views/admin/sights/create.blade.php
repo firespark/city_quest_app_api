@@ -34,7 +34,7 @@
 
         <div class="mb-3">
             <label class="mb-2">Изображение</label>
-            <input class="form-control" type="text" name="image" value="{{ old('image') }}" placeholder="URL или путь к изображению">
+            <input class="form-control" type="text" name="image" value="{{ old('image') }}" placeholder="Путь к изображению">
         </div>
 
         <div class="mb-3">

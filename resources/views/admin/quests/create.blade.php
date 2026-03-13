@@ -7,14 +7,9 @@
     </div>
 
     @include('admin.alerts')
-    <form 
-        class="w-75" 
-        method="post" 
-        action="{{ route('admin.quests.store') }}" 
-        enctype="multipart/form-data"
-    >
+    <form class="w-75" method="post" action="{{ route('admin.quests.store') }}" enctype="multipart/form-data">
         @csrf
-        
+
         <div class="mb-3">
             <label class="mb-2">Заголовок *</label>
             <input type="text" class="form-control" name="title" value="{{ old('title') }}" required>
@@ -26,9 +21,14 @@
         </div>
 
         <div class="mb-3">
-            <label class="mb-2 w-100">Изображение</label>
-            <input class="form-control" type="file" aria-describedby="questImageHelp" name="image">
-            <div id="questImageHelp" class="form-text">Допускаются форматы jpg, jpeg, png, gif, webp</div>
+            <label class="mb-2">Порядковый номер</label>
+            <input type="number" class="form-control" name="order_number" value="{{ old('order_number', 0) }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="mb-2">Изображение</label>
+            <input class="form-control" type="text" name="image" value="{{ old('image') }}"
+                placeholder="Путь к изображению">
         </div>
 
         <div class="mb-3">
@@ -36,11 +36,11 @@
             <select class="form-select select2" name="city_id">
                 <option value="0" {{ old('city_id') == 0 ? 'selected' : '' }}>Не опубликовано</option>
                 @foreach($cities as $c => $c_id)
-                <option value="{{ $c_id }}" {{ old('city_id') == $c_id ? 'selected' : '' }}>{{ $c }}</option>
+                    <option value="{{ $c_id }}" {{ old('city_id') == $c_id ? 'selected' : '' }}>{{ $c }}</option>
                 @endforeach
             </select>
         </div>
-       
+
         <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" id="questPublished" name="featured" {{ old('featured') ? 'checked' : '' }}>
             <label class="form-check-label" for="questPublished">На главной</label>
@@ -75,7 +75,7 @@
             <label class="mb-2">Количество подсказок</label>
             <input type="number" class="form-control" name="hints_number" value="{{ old('hints_number', 3) }}">
         </div>
-        
+
         <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" id="questShown" name="published" {{ old('published') ? 'checked' : '' }}>
             <label class="form-check-label" for="questShown">Опубликован</label>
@@ -88,5 +88,5 @@
 
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
-  
+
 @endsection

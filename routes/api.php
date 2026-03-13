@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['namespace' => 'App\Http\Controllers\Api',], function() {
+Route::group(['namespace' => 'App\Http\Controllers\Api',], function () {
 
     Route::post('/auth/login', 'AuthController@login');
     Route::post('/auth/loginGoogle', 'AuthController@loginGoogle');
@@ -51,6 +51,8 @@ Route::group(['namespace' => 'App\Http\Controllers\Api',], function() {
     Route::get('/quests/get/{id}', 'QuestsController@get');
     Route::get('/quests/done', 'QuestsController@done');
     Route::get('/quests/opened', 'QuestsController@opened');
+    Route::get('/quests/purchased', 'QuestsController@purchased');
+    Route::post('/quests/buy', 'QuestsController@buy');
 
     Route::get('/users/get', 'UsersController@get');
     Route::get('/users/getStatus', 'UsersController@getStatus');
@@ -58,5 +60,8 @@ Route::group(['namespace' => 'App\Http\Controllers\Api',], function() {
     Route::post('/users/saveNotes', 'UsersController@saveNotes');
     Route::post('/users/savePassword', 'UsersController@savePassword');
     //Route::get('/users/testDelete', 'UsersController@testDelete');
+
+
+    Route::post('/google-emulator/verify', 'PaymentEmulatorController@verify');
 
 });

@@ -6,17 +6,13 @@
         <div class="h4">Редактировать квест</div>
     </div>
     <div class="mb-4">
-        <div class="h5"><a href="{{route('admin.quests.city', ['city_id' => $city->id])}}">Квесты в городе {{$city->title}}</a></div>
+        <div class="h5"><a href="{{route('admin.quests.city', ['city_id' => $city->id])}}">Квесты в городе
+                {{$city->title}}</a></div>
     </div>
     @include('admin.alerts')
 
-    <form 
-        class="w-75" 
-        method="post" 
-        action="{{ route('admin.quests.update', $quest->id) }}" 
-        autocomplete="off" 
-        enctype="multipart/form-data"
-    >
+    <form class="w-75" method="post" action="{{ route('admin.quests.update', $quest->id) }}" autocomplete="off"
+        enctype="multipart/form-data">
         @csrf
         <input name="_method" type="hidden" value="put">
 
@@ -31,10 +27,18 @@
         </div>
 
         <div class="mb-3">
+            <label class="mb-2">Порядковый номер</label>
+            <input type="number" class="form-control" name="order_number" value="{{$quest->order_number}}">
+        </div>
+
+        <div class="mb-3">
             <label class="mb-2 w-100">Изображение</label>
-            <img src="/img/{{$quest->image}}" alt="" class="mb-2 border border-1" width="500px">
-            <input class="form-control" type="file" aria-describedby="questImageHelp" name="image">
-            <div id="questImageHelp" class="form-text">Допускаются форматы jpg, jpeg, png, gif, webp</div>
+            @if($quest->image)
+                <img src="/img/{{ $quest->image }}" id="main_img"
+                    alt="" class="mb-2 border border-1 d-block" width="500px">
+            @endif
+            <input class="form-control" type="text" name="image" id="main_input" value="{{$quest->image}}"
+                placeholder="Путь к изображению">
         </div>
 
         <div class="mb-3">
@@ -42,13 +46,13 @@
             <select class="form-select select2" name="city_id">
                 <option value="0">Не опубликовано</option>
                 @foreach($cities as $c => $c_id)
-                <option value="{{$c_id}}"{{($c_id == $quest->city_id) ? ' selected' : ''}}>{{$c}}</option>
+                    <option value="{{$c_id}}" {{($c_id == $quest->city_id) ? ' selected' : ''}}>{{$c}}</option>
                 @endforeach
             </select>
         </div>
-       
+
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="questPublished" name="featured"{{($quest->featured == 1) ? ' checked' : ''}}>
+            <input class="form-check-input" type="checkbox" id="questPublished" name="featured" {{($quest->featured == 1) ? ' checked' : ''}}>
             <label class="form-check-label" for="questPublished">На главной</label>
         </div>
 
@@ -83,12 +87,12 @@
         </div>
 
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="questShown" name="published"{{($quest->published == 1) ? ' checked' : ''}}>
+            <input class="form-check-input" type="checkbox" id="questShown" name="published" {{($quest->published == 1) ? ' checked' : ''}}>
             <label class="form-check-label" for="questShown">Опубликован</label>
         </div>
 
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="questPaid" name="paid"{{($quest->paid == 1) ? ' checked' : ''}}>
+            <input class="form-check-input" type="checkbox" id="questPaid" name="paid" {{($quest->paid == 1) ? ' checked' : ''}}>
             <label class="form-check-label" for="questPaid">Платный</label>
         </div>
 

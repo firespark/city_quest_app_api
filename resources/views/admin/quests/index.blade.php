@@ -19,6 +19,9 @@
       <thead>
         <tr>
           <th class="text-center align-middle" scope="col">#</th>
+          @if(isset($city))
+            <th class="text-center align-middle" scope="col">Порядок</th>
+          @endif
           <th class="text-center align-middle" scope="col">Изображение</th>
           <th class="align-middle" scope="col">Заголовок</th>
           <th class="text-center align-middle" scope="col">Город</th>
@@ -30,6 +33,9 @@
         @foreach($quests as $quest)
           <tr class="{{ $quest->paid ? 'table-warning' : '' }}">
             <th class="text-center align-middle" scope="row">{{$quest->id}}</th>
+            @if(isset($city))
+            <td class="text-center align-middle fw-bold">{{$quest->order_number}}</td>
+            @endif
             <td>
               <img src="{{$quest->getImage()}}" alt="" width="150">
             </td>

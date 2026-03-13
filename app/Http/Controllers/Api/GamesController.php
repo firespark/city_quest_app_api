@@ -13,79 +13,67 @@ use Mail;
 
 class GamesController extends ApiController
 {
-    
+
 
     public function get(Request $request, $quest_id)
     {
-        
         $user_id = User::autoriseUserByToken($request);
+        $user = User::find($user_id);
 
+        if ($user) {
 
-        if($user_id) 
-        {
+            if (!$user->hasQuestAccess($quest_id)) {
+                $this->response->setStatus(402);
+                $this->response->setError('Этот квест необходимо приобрести');
+                return $this->response->responseData();
+            }
+
             $data = Game::getData($quest_id, $user_id);
-
             $this->response->setData($data);
             $this->response->toggleSuccess();
-        }
-
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
-        
-
         return $this->response->responseData();
-
     }
 
 
 
     public function next(Request $request, $quest_id)
     {
-        
+
         $user_id = User::autoriseUserByToken($request);
 
-        if($user_id) 
-        {
+        if ($user_id) {
             $game = Game::where('user_id', $user_id)
-                        ->where('quest_id', $quest_id)
-                        ->first();
-            if(!empty($game))
-            {
+                ->where('quest_id', $quest_id)
+                ->first();
+            if (!empty($game)) {
 
-                if($game->status == 2) {
-                    
-                    
+                if ($game->status == 2) {
 
-                    if($game->is_finish($quest_id, $game->step, $game->status))
-                    {
+
+
+                    if ($game->is_finish($quest_id, $game->step, $game->status)) {
                         $game->finished = 1;
                         $game->save();
-                    }
-                    else {
+                    } else {
                         $game->updateStatus();
                     }
-                    
+
 
                     $data = $game->getData($quest_id, $user_id);
-                    
-                    $this->response->setData($data);  
+
+                    $this->response->setData($data);
                     $this->response->toggleSuccess();
-                }
-                else {
+                } else {
                     $this->response->setStatus(403);
                 }
-            }
-            else
-            {
+            } else {
                 $this->response->setStatus(404);
             }
-        }
-
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
@@ -97,107 +85,88 @@ class GamesController extends ApiController
     {
         $quest_answer = $request->get('quest_answer');
 
-        if($quest_answer) 
-        {
+        if ($quest_answer) {
             $user_id = User::autoriseUserByToken($request);
 
-            if($user_id) 
-            {
+            if ($user_id) {
 
                 $game = Game::where('user_id', $user_id)
-                        ->where('quest_id', $quest_id)
-                        ->first();
+                    ->where('quest_id', $quest_id)
+                    ->first();
 
-                if(!empty($game))
-                {
+                if (!empty($game)) {
 
 
                     $sight = Sight::where('quest_id', $quest_id)->where('step', $game->step)->first();
 
-                    if(!empty($sight))
-                    {
+                    if (!empty($sight)) {
 
                         $answerData = $sight->checkAnswer($quest_answer, $request->get('answer_number'));
-                        
-                        if(!$answerData['errors']) {
+
+                        if (!$answerData['errors']) {
                             $game->updateStatus();
                             $game->hint = 0;
                         }
-                                                    
+
                         $data = $game->getData($quest_id, $user_id);
                         $data['inputResults'] = $answerData['inputResults'];
                         $data['errors'] = $answerData['errors'];
-                        
-                        $this->response->setData($data);  
+
+                        $this->response->setData($data);
 
                         $this->response->toggleSuccess();
 
 
-                    }
-                    else
-                    {
+                    } else {
                         $this->response->setStatus(404);
                         $this->response->setError('Достопримечательность не найдена');
                     }
-                }
-                else
-                {
+                } else {
                     $this->response->setStatus(404);
                 }
-            }
-            else
-            {
+            } else {
                 $this->response->setStatus(401);
             }
-        }
-        else
-        {
+        } else {
             $this->response->setError('Неправильный ответ');
         }
 
         return $this->response->responseData();
 
-        
+
     }
 
-    public function getHint(Request $request, $quest_id){
+    public function getHint(Request $request, $quest_id)
+    {
         $user_id = User::autoriseUserByToken($request);
 
-        if($user_id) 
-        {
+        if ($user_id) {
 
             $game = Game::where('user_id', $user_id)->where('quest_id', $quest_id)->first();
 
-            if(!empty($game))
-            {
+            if (!empty($game)) {
 
                 $sight = Sight::select('id')->where('quest_id', $quest_id)->where('step', $game->step)->first();
 
-                if(!empty($sight))
-                {
+                if (!empty($sight)) {
                     $gameItem = Gameitem::where('game_id', $game->id)->where('step', $game->step)->first();
 
-                    if (!$gameItem)
-                    {
+                    if (!$gameItem) {
                         $gameItem = new Gameitem;
 
                         $gameItem->game_id = $game->id;
                         $gameItem->step = $game->step;
                     }
 
-                
-                    if ( 
+
+                    if (
                         ($gameItem->hint1 && ($game->status == 0)) ||
                         ($gameItem->hint2 && ($game->status == 1))
-                    )
-                    {
+                    ) {
                         $this->response->setError('Подсказка уже использована.');
-                    }
-                    elseif ($game->hints_number < 1) {
+                    } elseif ($game->hints_number < 1) {
                         $this->response->setError('Подсказок больше нет.');
-                    }
-                    else
-                    {
+                    } else {
                         switch ($game->status) {
                             case 0:
                                 $gameItem->hint1 = 1;
@@ -211,35 +180,25 @@ class GamesController extends ApiController
                         $game->hints_number--;
 
 
-                        if($game->save() && $gameItem->save())
-                        {
+                        if ($game->save() && $gameItem->save()) {
                             $data = $game->getData($quest_id, $user_id);
-                    
-                            $this->response->setData($data);  
+
+                            $this->response->setData($data);
                             $this->response->toggleSuccess();
 
-                        }
-                        else
-                        {
+                        } else {
                             $this->response->setStatus(500);
                         }
                     }
-                }
-                else
-                {
+                } else {
                     $this->response->setStatus(404);
                     $this->response->setError('Достопримечательность не найдена');
                 }
-            }
-            else
-            {
+            } else {
                 $this->response->setStatus(404);
             }
-            
-        }
 
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
@@ -248,18 +207,16 @@ class GamesController extends ApiController
 
     public function sendSkip($comment, $question_num, $quest_id, $step)
     {
-       
-        if ($comment)
-        {
+
+        if ($comment) {
             $sight = Sight::select('title')->where('quest_id', $quest_id)->where('step', $step)->first();
             $quest = Quest::select('title')->where('id', $quest_id)->first();
             $send_message = 'Квест: ' . $quest->title . '<br>';
             $send_message .= 'Достопримечательность: ' . $sight->title . '<br>';
             $send_message .= 'Вопрос номер: ' . $question_num . '<br>';
-            $send_message .= 'Комментарий: ' . $comment . '<br>'; 
+            $send_message .= 'Комментарий: ' . $comment . '<br>';
 
-            Mail::send([], [], function($message) use ($send_message)
-            {
+            Mail::send([], [], function ($message) use ($send_message) {
                 $message->to(env('MAIL_TO_ADDRESS'));
                 $message->subject('Гагара-Квест приложение. Отчёт о пропуске задания.');
                 $message->setBody($send_message, 'text/html');
@@ -269,123 +226,102 @@ class GamesController extends ApiController
 
     }
 
-    public function getSkip(Request $request, $quest_id){
+    public function getSkip(Request $request, $quest_id)
+    {
         $user_id = User::autoriseUserByToken($request);
 
-        if($user_id) 
-        {
+        if ($user_id) {
 
             $game = Game::where('user_id', $user_id)->where('quest_id', $quest_id)->first();
 
-            if(!empty($game))
-            {
+            if (!empty($game)) {
 
-                
-                    $gameItem = Gameitem::where('game_id', $game->id)->where('step', $game->step)->first();
 
-                    if (!$gameItem)
-                    {
-                        $gameItem = new Gameitem;
+                $gameItem = Gameitem::where('game_id', $game->id)->where('step', $game->step)->first();
 
-                        $gameItem->game_id = $game->id;
-                        $gameItem->step = $game->step;
+                if (!$gameItem) {
+                    $gameItem = new Gameitem;
+
+                    $gameItem->game_id = $game->id;
+                    $gameItem->step = $game->step;
+                }
+
+
+                if (
+                    ($gameItem->skip1 && ($game->status == 0)) ||
+                    ($gameItem->skip2 && ($game->status == 1))
+                ) {
+                    $this->response->setError('Пропуск уже использован.');
+                } elseif ($game->skips_number < 1) {
+                    $this->response->setError('Пропусков больше нет.');
+                } else {
+                    $reason_id = $request->get('reason_id');
+                    $comment = $request->get('comment');
+
+                    if ($reason_id == 3) {
+                        $this->sendSkip($comment, $game->status + 1, $quest_id, $game->step);
                     }
 
-                    
-                    if ( 
-                        ($gameItem->skip1 && ($game->status == 0)) ||
-                        ($gameItem->skip2 && ($game->status == 1))
-                    )
-                    {
-                        $this->response->setError('Пропуск уже использован.');
+                    switch ($game->status) {
+                        case 0:
+                            $gameItem->skip1 = $reason_id;
+                            $gameItem->skip_comment_1 = $comment;
+                            $game->status = 1;
+                            break;
+
+                        case 1:
+                            $gameItem->skip2 = $reason_id;
+                            $gameItem->skip_comment_2 = $comment;
+                            $game->status = 2;
+                            break;
                     }
-                    elseif ($game->skips_number < 1) {
-                        $this->response->setError('Пропусков больше нет.');
+                    if ($game->is_finish($quest_id, $game->step, $game->status)) {
+                        $game->finished = 1;
                     }
-                    else
-                    {   
-                        $reason_id = $request->get('reason_id');
-                        $comment = $request->get('comment');
-
-                        if ($reason_id == 3) {
-                            $this->sendSkip($comment, $game->status + 1, $quest_id, $game->step);
-                        }
-                        
-                        switch ($game->status) {
-                            case 0:
-                                $gameItem->skip1 = $reason_id;
-                                $gameItem->skip_comment_1 = $comment;
-                                $game->status = 1;
-                                break;
-
-                            case 1:
-                                $gameItem->skip2 = $reason_id;
-                                $gameItem->skip_comment_2 = $comment;
-                                $game->status = 2;
-                                break;
-                        }
-                        if($game->is_finish($quest_id, $game->step, $game->status))
-                        {
-                            $game->finished = 1;
-                        }
-                        $game->skips_number--;
+                    $game->skips_number--;
 
 
-                        if($game->save() && $gameItem->save())
-                        {
-                            $data = $game->getData($quest_id, $user_id);
-                    
-                            $this->response->setData($data);  
-                            $this->response->toggleSuccess();
+                    if ($game->save() && $gameItem->save()) {
+                        $data = $game->getData($quest_id, $user_id);
 
-                        }
-                        else
-                        {
-                            $this->response->setStatus(500);
-                        }
+                        $this->response->setData($data);
+                        $this->response->toggleSuccess();
+
+                    } else {
+                        $this->response->setStatus(500);
                     }
-                
-            }
-            else
-            {
+                }
+
+            } else {
                 $this->response->setStatus(404);
             }
-            
-        }
 
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
         return $this->response->responseData();
     }
 
-    public function reset(Request $request, $quest_id){
+    public function reset(Request $request, $quest_id)
+    {
 
         $user_id = User::autoriseUserByToken($request);
-        
-        if($user_id) 
-        {
+
+        if ($user_id) {
 
             $game = Game::where('user_id', $user_id)->where('quest_id', $quest_id)->first();
 
-            if(!empty($game))
-            {
+            if (!empty($game)) {
 
                 $game = $game->delete();
                 $this->response->toggleSuccess();
 
-            }
-            else
-            {
+            } else {
                 $this->response->setStatus(404);
             }
-            
-        }
 
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
@@ -395,59 +331,47 @@ class GamesController extends ApiController
 
     public function setMode(Request $request, $quest_id)
     {
-
         $user_id = User::autoriseUserByToken($request);
+        $user = User::find($user_id);
 
-        if($user_id) 
-        {
+        if ($user) {
+
+            if (!$user->hasQuestAccess($quest_id)) {
+                $this->response->setStatus(402);
+                $this->response->setError('Этот квест необходимо приобрести');
+                return $this->response->responseData();
+            }
 
             $quest = Quest::select('skips_number', 'hints_number')->where('id', $quest_id)->first();
 
-            if(!empty($quest))
-            {
-                $game = Game::select('step', 'user_id')
-                    ->where('user_id', $user_id)
+            if (!empty($quest)) {
+
+                $game = Game::where('user_id', $user->id)
                     ->where('quest_id', $quest_id)
                     ->first();
 
-                if (!isset($game->step))
-                {
-                    
+                if (!$game) {
                     $game = new Game;
-
-                    $game->user_id = $user_id;
+                    $game->user_id = $user->id;
                     $game->quest_id = $quest_id;
                     $game->step = 1;
                     $game->skips_number = $quest->skips_number;
                     $game->hints_number = $quest->hints_number;
-
-                    
                 }
 
                 $game->mode_id = $request->get('mode_id');
 
-                if($game->save())
-                {
-                    $data = $game->getData($quest_id, $user_id);
-                    
-                    $this->response->setData($data);  
+                if ($game->save()) {
+                    $data = $game->getData($quest_id, $user->id);
+                    $this->response->setData($data);
                     $this->response->toggleSuccess();
-                }
-                else 
-                {
+                } else {
                     $this->response->setStatus(500);
                 }
-            }
-            else
-            {
+            } else {
                 $this->response->setStatus(404);
             }
-
-
-        }
-
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
@@ -456,29 +380,23 @@ class GamesController extends ApiController
 
     public function getLevel(Request $request, $quest_id, $level)
     {
-        
         $user_id = User::autoriseUserByToken($request);
+        $user = User::find($user_id);
 
-        if($user_id) 
-        {
+        if ($user) {
+            if (!$user->hasQuestAccess($quest_id)) {
+                $this->response->setStatus(402);
+                $this->response->setError('Этот квест необходимо приобрести');
+                return $this->response->responseData();
+            }
+
             $data = Game::getData($quest_id, $user_id, $level);
-            
             $this->response->setData($data);
             $this->response->toggleSuccess();
-        }
-
-        else
-        {
+        } else {
             $this->response->setStatus(401);
         }
 
-
         return $this->response->responseData();
-
     }
-
-    
-
-    
-    
 }

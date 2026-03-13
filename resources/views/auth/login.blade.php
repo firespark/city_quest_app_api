@@ -3,7 +3,7 @@
 @section('content')
 
     <section class="alabaster paddind" id="Portfolio">
-        <!--main-section-start-->
+
         <div class="container">
             <h2 class="h1">Вход</h2>
             
