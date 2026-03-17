@@ -64,6 +64,7 @@ class CitiesController extends Controller
             'content' => $validatedData['content'],
             'image' => $imagePath,
             'featured' => $request->has('featured'),
+            'published' => $request->has('published'),
             'parent_id' => $validatedData['parent_id'] ?? 0,
             'map' => $validatedData['map'],
         ]);
@@ -113,6 +114,7 @@ class CitiesController extends Controller
             'content' => $validatedData['content'],
             'image' => $imagePath,
             'featured' => $request->has('featured'),
+            'published' => $request->has('published'),
             'parent_id' => $validatedData['parent_id'] ?? 0,
             'map' => $validatedData['map'],
         ]);

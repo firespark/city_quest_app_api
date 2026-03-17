@@ -60,6 +60,16 @@
             <label class="mb-2">Карта с достопримечательностями</label>
             <input type="text" class="form-control" value="{{$city->map}}" name="map">
         </div>
+        <div class="mb-3 form-group form-check">
+            <input 
+                type="checkbox" 
+                class="form-check-input" 
+                name="published" 
+                id="publishedCheck" 
+                {{ $city->published ? 'checked' : '' }}
+            >
+            <label class="form-check-label" for="publishedCheck">Опубликован</label>
+        </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
 @endsection
