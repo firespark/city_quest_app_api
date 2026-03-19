@@ -14,6 +14,11 @@ class City extends Model
         return $this->hasMany(Quest::class);
     }
 
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
 
     public function getImage()
     {

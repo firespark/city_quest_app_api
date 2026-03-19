@@ -13,6 +13,7 @@
       <thead>
         <tr>
           <th scope="col">#</th>
+          <th scope="col">Страна</th>
           <th scope="col">Заголовок</th>
           <th scope="col">Статус</th>
           <th scope="col"></th>
@@ -22,6 +23,7 @@
         @foreach($cities as $city)
           <tr>
             <th scope="row">{{$city->id}}</th>
+            <td>{{ $city->country->title ?? 'Не указана' }}</td>
             <td><a href="{{route('admin.quests.city', ['city_id' => $city->id])}}">{{$city->title}}</a></td>
             <td class="text-center align-middle">
               @if($city->published)

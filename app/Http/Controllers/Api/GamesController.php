@@ -86,6 +86,7 @@ class GamesController extends ApiController
         $quest_answer = $request->get('quest_answer');
 
         if ($quest_answer) {
+            
             $user_id = User::autoriseUserByToken($request);
 
             if ($user_id) {

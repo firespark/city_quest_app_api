@@ -20,28 +20,26 @@ class Sight extends Model
         return $this->hasMany(Task::class);
     }
 
-    
+
     public function getQuestTitle()
     {
-        if ($this->quest != null)
-        {
+        if ($this->quest != null) {
             return $this->quest->title;
         }
 
         return '';
     }
 
-    
+
     public function getImage()
     {
-        if($this->image == null) 
-        {
+        if ($this->image == null) {
             return URL::to('/') . '/img/the-blurred.jpg';
         }
         return URL::to('/') . '/img/' . $this->image;
     }
 
-    
+
 
     public static function checkStep($step, $quest_id)
     {
@@ -55,68 +53,52 @@ class Sight extends Model
         }
 
         return $step;
-        
+
     }
 
-    
+
     public function checkAnswer($answer, $answerNumber)
     {
-        
-        $data['inputResults'] = array_fill(0, count($answer), 0);;
+        $data['inputResults'] = array_fill(0, count($answer), 0);
         $errors = 0;
 
-        switch ($answerNumber) {
-            case 1:
-                $answerStr = $this->answer1;
-                break;
-
-            case 2:
-                $answerStr = $this->answer2;
-                break;
-            
-        }
+        $answerStr = ($answerNumber == 1) ? $this->answer1 : $this->answer2;
 
         $answerArr = explode('|', $answerStr);
 
-        if (!empty($answerArr))
-        {
-            foreach($answerArr as $key => $arr)
-            {
-                $strArr = explode(',', str_replace('-', '', $arr));
+        if (!empty($answerArr)) {
+            foreach ($answerArr as $key => $arr) {
+
+                $rawStr = mb_strtolower(str_replace(['-', 'ё'], ['', 'е'], $arr));
+                $strArr = explode(',', $rawStr);
+
                 $correct = 0;
-               /*  if (in_array(mb_strtolower(trim(str_replace('-', '', $answer[$key]))), $strArr))
-                    {
+
+                foreach ($answer as $answer_key => $answer_value) {
+
+                    if ($data['inputResults'][$answer_key] == 1)
+                        continue;
+
+                    $userVal = trim($answer_value);
+                    $cleanUserAnswer = mb_strtolower(str_replace(['-', 'ё'], ['', 'е'], $userVal));
+
+                    if (in_array($cleanUserAnswer, $strArr)) {
                         $correct = 1;
-                        unset($answerArr[$key]);
-                    }
-                */
-                foreach($answer as $answer_key => $answer_value) {
-                    
-                    if (in_array(mb_strtolower(trim(str_replace('-', '', $answer_value))), $strArr))
-                    {
-                        $correct = 1;
-                        $data['inputResults'][$answer_key] = $correct;
+                        $data['inputResults'][$answer_key] = 1;
                         unset($answerArr[$key]);
                         break;
                     }
-                    
                 }
 
-                if(!$correct)
-                {
+                if (!$correct) {
                     $errors++;
                 }
-
-                
-
             }
-
         }
 
         $data['errors'] = $errors;
 
         return $data;
-        
     }
 
     public function getAnswerStr($answer)
@@ -124,22 +106,20 @@ class Sight extends Model
         $str = '';
         $answerArr = explode('|', $answer);
 
-        if (!empty($answerArr))
-        {
-            foreach($answerArr as $arr)
-            {
+        if (!empty($answerArr)) {
+            foreach ($answerArr as $arr) {
                 $strArr = explode(',', $arr);
 
                 $str .= $strArr[0] . ' ';
 
             }
 
-            
+
         }
         return trim($str);
     }
 
-    
+
     public function getMaxStep($quest_id)
     {
         return $this->select('step')->where('quest_id', '=', $quest_id)->max('step');
@@ -157,7 +137,7 @@ class Sight extends Model
                 return count(explode('|', $this->answer2));
                 break;
 
-            
+
             default:
                 return 0;
                 break;
@@ -178,13 +158,14 @@ class Sight extends Model
                 $arrs = explode('|', $this->answer2);
                 break;
 
-            
+
             default:
                 return null;
                 break;
         }
 
-        if(empty($arrs)) return null;
+        if (empty($arrs))
+            return null;
 
         $answer = '';
 
@@ -193,7 +174,7 @@ class Sight extends Model
             $answer .= ' ' . $arr_item[0];
         }
 
-        return(trim($answer));
+        return (trim($answer));
 
     }
 
@@ -201,17 +182,17 @@ class Sight extends Model
     {
 
         $data = [];
-        $data['title'] = ( ( ($status == 1 || $status == 2) && ($mode == 1 || $mode == 2) ) || ( ($status == 2) && ($mode == 3 || $mode == 4) ) ) ? $this->title : null;
+        $data['title'] = ((($status == 1 || $status == 2) && ($mode == 1 || $mode == 2)) || (($status == 2) && ($mode == 3 || $mode == 4))) ? $this->title : null;
 
-        $data['image'] = ( ( ($status == 1 || $status == 2) && ($mode == 1 || $mode == 2 || $mode == 3) ) || ( $status == 2 && $mode == 4 ) ) ? $this->getImage() : null;
+        $data['image'] = ((($status == 1 || $status == 2) && ($mode == 1 || $mode == 2 || $mode == 3)) || ($status == 2 && $mode == 4)) ? $this->getImage() : null;
 
-        $data['content'] = ( ( ($status == 1 || $status == 2) && ($mode == 1 || $mode == 2) ) || ( ($status == 2) && ($mode == 3 || $mode == 4) ) ) ? $this->getPs() : null;
+        $data['content'] = ((($status == 1 || $status == 2) && ($mode == 1 || $mode == 2)) || (($status == 2) && ($mode == 3 || $mode == 4))) ? $this->getPs() : null;
 
-        $data['address'] = ( ( ($status == 1 || $status == 2) && $mode == 1 ) || ( ($status == 2) && ($mode == 2 ||$mode == 3 || $mode == 4) ) ) ? $this->address : null;
+        $data['address'] = ((($status == 1 || $status == 2) && $mode == 1) || (($status == 2) && ($mode == 2 || $mode == 3 || $mode == 4))) ? $this->address : null;
 
-        $data['latitude'] = ( ( ($status == 1 || $status == 2) && $mode == 1 ) || ( ($status == 2) && ($mode == 2 ||$mode == 3 || $mode == 4) ) ) ? $this->latitude : null;
+        $data['latitude'] = ((($status == 1 || $status == 2) && $mode == 1) || (($status == 2) && ($mode == 2 || $mode == 3 || $mode == 4))) ? $this->latitude : null;
 
-        $data['longitude'] = ( ( ($status == 1 || $status == 2) && $mode == 1 ) || ( ($status == 2) && ($mode == 2 ||$mode == 3 || $mode == 4) ) ) ? $this->longitude : null;
+        $data['longitude'] = ((($status == 1 || $status == 2) && $mode == 1) || (($status == 2) && ($mode == 2 || $mode == 3 || $mode == 4))) ? $this->longitude : null;
 
 
         $data['answer1'] = ($status == 1 || $status == 2) ? $this->getUserFriendlyAnswer(1) : null;
@@ -232,10 +213,10 @@ class Sight extends Model
         //return $content;
 
         $arr = explode('</p>', $content);
-        
+
         return $arr;
     }
 
 
-   
+
 }

@@ -11,6 +11,17 @@
     <form class="w-75" method="post" action="{{ route('admin.cities.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="mb-3">
+            <label class="mb-2">Страна *</label>
+            <select name="country_id" class="form-select" required>
+                <option value="" disabled {{ !isset($city) ? 'selected' : '' }}>-- Выберите страну --</option>
+                @foreach($countries as $country)
+                    <option value="{{ $country->id }}" {{ (isset($city) && $city->country_id == $country->id) || old('country_id') == $country->id ? 'selected' : '' }}>
+                        {{ $country->title }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
             <label class="mb-2">Город *</label>
             <input type="text" class="form-control" name="title" value="{{ old('title') }}" required>
         </div>

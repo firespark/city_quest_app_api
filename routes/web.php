@@ -75,6 +75,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers\Admin', 
     ])->only(['index', 'store', 'show', 'edit', 'update', 'destroy']);
 
     Route::get('/quest/{quest_id}/sights', 'SightsController@quest')->name('admin.sights.quest');
+
+    Route::resource('/countries', 'CountriesController', ['as' => 'admin']);
    
 
 });

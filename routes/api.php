@@ -26,6 +26,8 @@ Route::group(['namespace' => 'App\Http\Controllers\Api',], function () {
     Route::post('/auth/sendPasswordReset', 'AuthController@sendPasswordReset');
     Route::get('/auth/getAuth', 'AuthController@getAuth');
 
+    Route::get('/countries/all', 'CountriesController@index');
+
     Route::get('/cities/all', 'CitiesController@index');
     Route::get('/cities/featured', 'CitiesController@featured');
     Route::post('/cities/search', 'CitiesController@search');

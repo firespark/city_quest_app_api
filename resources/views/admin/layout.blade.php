@@ -14,7 +14,7 @@
     <header>
         <nav class="navbar navbar-expand navbar-light bg-light mb-4">
           <div class="container-fluid">
-            <a class="navbar-brand me-auto" href="#">Административная панель</a>
+            <a class="navbar-brand me-auto" href="/admin">Административная панель</a>
             
             <div>
               

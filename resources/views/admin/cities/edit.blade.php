@@ -18,6 +18,18 @@
         @csrf
         <input name="_method" type="hidden" value="put">
         <div class="mb-3">
+            <label class="mb-2">Страна *</label>
+            <select name="country_id" class="form-select" required>
+                <option value="" disabled {{ !isset($city) ? 'selected' : '' }}>-- Выберите страну --</option>
+                @foreach($countries as $country)
+                    <option value="{{ $country->id }}" 
+                        {{ (isset($city) && $city->country_id == $country->id) || old('country_id') == $country->id ? 'selected' : '' }}>
+                        {{ $country->title }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
             <label class="mb-2">Город *</label>
             <input type="text" class="form-control" value="{{$city->title}}" name="title" required>
         </div>
