@@ -48,7 +48,12 @@
 
         <div class="mb-3">
             <label class="mb-2">Описание</label>
-            <textarea class="form-control" name="content">{{ old('content') }}</textarea>
+            <textarea class="form-control" name="content" rows="7">{{ old('content') }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="mb-2">Описание под кнопкой</label>
+            <textarea class="form-control" name="content2" rows="7">{{ old('content2') }}</textarea>
         </div>
 
         <div class="mb-3">

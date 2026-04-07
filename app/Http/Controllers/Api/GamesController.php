@@ -28,6 +28,25 @@ class GamesController extends ApiController
                 return $this->response->responseData();
             }
 
+            $game = Game::where('user_id', $user->id)
+                ->where('quest_id', $quest_id)
+                ->first();
+
+            if (!$game) {
+                $quest = Quest::select('skips_number', 'hints_number')->where('id', $quest_id)->first();
+                
+                if (!empty($quest)) {
+                    $game = new Game;
+                    $game->user_id = $user->id;
+                    $game->quest_id = $quest_id;
+                    $game->step = 1;
+                    $game->skips_number = $quest->skips_number;
+                    $game->hints_number = $quest->hints_number;
+                    $game->mode_id = 1;
+                    $game->save();
+                }
+            }
+
             $data = Game::getData($quest_id, $user_id);
             $this->response->setData($data);
             $this->response->toggleSuccess();
@@ -86,7 +105,7 @@ class GamesController extends ApiController
         $quest_answer = $request->get('quest_answer');
 
         if ($quest_answer) {
-            
+
             $user_id = User::autoriseUserByToken($request);
 
             if ($user_id) {
@@ -330,7 +349,7 @@ class GamesController extends ApiController
     }
 
 
-    public function setMode(Request $request, $quest_id)
+    /*public function setMode(Request $request, $quest_id)
     {
         $user_id = User::autoriseUserByToken($request);
         $user = User::find($user_id);
@@ -377,7 +396,7 @@ class GamesController extends ApiController
         }
 
         return $this->response->responseData();
-    }
+    }*/
 
     public function getLevel(Request $request, $quest_id, $level)
     {
@@ -394,6 +413,43 @@ class GamesController extends ApiController
             $data = Game::getData($quest_id, $user_id, $level);
             $this->response->setData($data);
             $this->response->toggleSuccess();
+        } else {
+            $this->response->setStatus(401);
+        }
+
+        return $this->response->responseData();
+    }
+
+    public function buyExtras(Request $request, $quest_id)
+    {
+        $user_id = User::autoriseUserByToken($request);
+
+        if ($user_id) {
+            $game = Game::where('user_id', $user_id)->where('quest_id', $quest_id)->first();
+
+            if (!empty($game)) {
+                $type = $request->get('type'); // 'hints' или 'skips'
+
+                if ($type === 'hints') {
+                    $game->hints_number += 3;
+                } elseif ($type === 'skips') {
+                    $game->skips_number += 3;
+                } else {
+                    $this->response->setStatus(400);
+                    $this->response->setError('Неверный тип товара');
+                    return $this->response->responseData();
+                }
+
+                if ($game->save()) {
+                    $data = $game->getData($quest_id, $user_id);
+                    $this->response->setData($data);
+                    $this->response->toggleSuccess();
+                } else {
+                    $this->response->setStatus(500);
+                }
+            } else {
+                $this->response->setStatus(404);
+            }
         } else {
             $this->response->setStatus(401);
         }

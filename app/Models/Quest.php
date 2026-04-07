@@ -27,41 +27,38 @@ class Quest extends Model
         return $this->hasMany(Game::class);
     }
 
-   
+
     public function getImage()
     {
-        if($this->image == null) 
-        {
+        if ($this->image == null) {
             return URL::to('/') . '/img/the-blurred.jpg';
         }
         return URL::to('/') . '/img/' . $this->image;
     }
 
-    
+
     public function getCityTitle()
     {
-        if ($this->city != null)
-        {
+        if ($this->city != null) {
             return $this->city->title;
         }
 
         return '';
     }
 
-    public function getPs()
+    public function getPs($value)
     {
-        $content = str_replace('<p>', '', $this->content);
+
+        $content = str_replace('<p>', '', $value);
         $content = str_replace('</p>', '', $content);
 
         return $content;
-
-        //return explode('</p>', $content);
     }
 
-    
+
     public function related()
     {
-        return Self::where('city_id', $this->city_id)->whereNotIn('id', [$this->id])->get();
+        return self::where('city_id', $this->city_id)->whereNotIn('id', [$this->id])->get();
     }
 
     public function getData($step, $mode_id)
@@ -83,6 +80,6 @@ class Quest extends Model
         return $data;
     }
 
-    
+
 
 }

@@ -9,7 +9,7 @@ class CountriesController extends ApiController
 {
     public function index()
     {
-        $countries = Country::select('id', 'title', 'slug')
+        $countries = Country::select('id', 'title', 'slug', 'flag')
             ->where('published', 1)
             ->orderBy('title', 'asc')
             ->get();

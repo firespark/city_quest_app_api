@@ -58,7 +58,11 @@
 
         <div class="mb-3">
             <label class="mb-2">Описание</label>
-            <textarea class="form-control" name="content">{{$quest->content}}</textarea>
+            <textarea class="form-control" name="content" rows="7">{{$quest->content}}</textarea>
+        </div>
+        <div class="mb-3">
+            <label class="mb-2">Описание под кнопкой</label>
+            <textarea class="form-control" name="content2" rows="7">{{$quest->content2}}</textarea>
         </div>
 
         <div class="mb-3">

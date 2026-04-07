@@ -39,11 +39,12 @@ Route::group(['namespace' => 'App\Http\Controllers\Api',], function () {
     Route::post('/games/checkAnswer/{quest_id}', 'GamesController@checkAnswer');
     Route::get('/games/getHint/{quest_id}', 'GamesController@getHint');
     Route::post('/games/getSkip/{quest_id}', 'GamesController@getSkip');
-    Route::post('/games/setMode/{quest_id}', 'GamesController@setMode');
+    //Route::post('/games/setMode/{quest_id}', 'GamesController@setMode');
     Route::get('/games/getLevel/{quest_id}/{level}', 'GamesController@getLevel');
     Route::post('/games/reset/{quest_id}', 'GamesController@reset');
+    Route::post('/games/buy-extras/{id}', 'GamesController@buyExtras');
 
-    Route::get('/modes/', 'ModesController@index');
+    //Route::get('/modes/', 'ModesController@index');
 
     Route::get('/pages/about', 'PagesController@about');
     Route::get('/pages/howPlay', 'PagesController@howPlay');
@@ -65,5 +66,6 @@ Route::group(['namespace' => 'App\Http\Controllers\Api',], function () {
 
 
     Route::post('/google-emulator/verify', 'PaymentEmulatorController@verify');
+    
 
 });

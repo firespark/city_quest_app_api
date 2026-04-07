@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-
 use App\Models\User;
 use App\Models\Mode;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 
 class UsersController extends ApiController
 {
@@ -19,12 +17,11 @@ class UsersController extends ApiController
         {
             $api_token = hash('sha256', $token);
             
-            $user = User::select('id', 'name', 'email', 'notes')->where('token', $api_token)->where('active', 1)->first();
-
-            if(!$user) {
-                $user = User::add($api_token);
-
-            }
+            $user = User::select('id', 'name', 'email', 'notes')
+                ->where('token', $api_token)
+                ->whereNotNull('email')
+                ->where('active', 1)
+                ->first();
 
 
             if($user)
@@ -34,22 +31,18 @@ class UsersController extends ApiController
                 $data['notes'] = $user->notes;
 
                 $this->response->setData($data);
-
                 $this->response->toggleSuccess();
-
             }
             else
             {
                 $this->response->setStatus(401);
+                $this->response->setError('Пожалуйста, авторизуйтесь');
             }
         }
-
         else
         {
             $this->response->setStatus(401);
         }
-
-        
 
         return $this->response->responseData();
     }
@@ -62,36 +55,29 @@ class UsersController extends ApiController
         {
             $api_token = hash('sha256', $token);
             
-            $user = User::select('id', 'name')->where('token', $api_token)->where('active', 1)->first();
-
+            $user = User::select('id', 'name')
+                ->where('token', $api_token)
+                ->whereNotNull('email')
+                ->where('active', 1)
+                ->first();
 
             if($user)
             {
                 $user->name = $request->get('name');
 
-                if($user->save())
-                {
+                if($user->save()) {
                     $this->response->toggleSuccess();
-
-                }
-                else
-                {
+                } else {
                     $this->response->setStatus(500);
                 }
-
             }
-            else
-            {
+            else {
                 $this->response->setStatus(401);
             }
         }
-
-        else
-        {
+        else {
             $this->response->setStatus(401);
         }
-
-        
 
         return $this->response->responseData();
     }
@@ -104,35 +90,29 @@ class UsersController extends ApiController
         {
             $api_token = hash('sha256', $token);
             
-            $user = User::select('id', 'notes')->where('token', $api_token)->where('active', 1)->first();
-
+            $user = User::select('id', 'notes')
+                ->where('token', $api_token)
+                ->whereNotNull('email')
+                ->where('active', 1)
+                ->first();
 
             if($user)
             {
                 $user->notes = $request->get('notes');
 
-                if($user->save())
-                {
+                if($user->save()) {
                     $this->response->toggleSuccess();
-
-                }
-                else
-                {
+                } else {
                     $this->response->setStatus(500);
                 }
-
             }
-            else
-            {
+            else {
                 $this->response->setStatus(401);
             }
         }
-
-        else
-        {
+        else {
             $this->response->setStatus(401);
         }
-
 
         return $this->response->responseData();
     }
@@ -145,38 +125,30 @@ class UsersController extends ApiController
         {
             $api_token = hash('sha256', $token);
             
-            $user = User::select('id', 'password')->where('token', $api_token)->where('active', 1)->first();
-
+            $user = User::select('id', 'password')
+                ->where('token', $api_token)
+                ->whereNotNull('email')
+                ->where('active', 1)
+                ->first();
 
             if($user)
             {
                 $password = $request->get('password');
-
                 $user->password = bcrypt($password);
 
-                if($user->save())
-                {
+                if($user->save()) {
                     $this->response->toggleSuccess();
-
-                }
-                else
-                {
+                } else {
                     $this->response->setStatus(500);
                 }
-
             }
-            else
-            {
+            else {
                 $this->response->setStatus(401);
             }
         }
-
-        else
-        {
+        else {
             $this->response->setStatus(401);
         }
-
-        
 
         return $this->response->responseData();
     }
@@ -184,7 +156,6 @@ class UsersController extends ApiController
     public function testDelete()
     {
         $users = User::all();
-
         foreach ($users as $user) {
             $user->delete(); 
         }
@@ -205,7 +176,7 @@ class UsersController extends ApiController
             {
                 $games = $user->games()->where('finished',1)->get();
                
-                if (!empty($games)){
+                if ($games->isNotEmpty()){
                     $modes_arr = [];
                     foreach ($games as $game) {
                         if (isset($modes_arr[$game->mode_id])){
@@ -217,9 +188,7 @@ class UsersController extends ApiController
                     }
                     if (!empty($modes_arr)){
                         $max_value = max($modes_arr);
-
                         $keys_with_max_value = array_keys($modes_arr, $max_value);
-
                         $max_key = max($keys_with_max_value);
                         $status = $max_key;
                     }
@@ -229,28 +198,20 @@ class UsersController extends ApiController
                 if ($mode) 
                 {
                     $this->response->setData($mode->title);
-
                     $this->response->toggleSuccess();
                 }
-                else
-                {
+                else {
                     $this->response->setStatus(401);
                 }
             }
-            else
-            {
+            else {
                 $this->response->setStatus(401);
             }
         }
-
-        else
-        {
+        else {
             $this->response->setStatus(401);
         }
 
-        
-
         return $this->response->responseData();
     }
-    
 }

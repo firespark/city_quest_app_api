@@ -129,7 +129,7 @@ class QuestsController extends ApiController
             $user = User::find($user_id);
         }
 
-        $quest = Quest::select('id', 'title', 'image', 'content', 'city_id', 'paid', 'start_point', 'end_point')
+        $quest = Quest::select('id', 'title', 'image', 'content', 'content2', 'city_id', 'paid', 'start_point', 'end_point')
             ->where('id', $id)
             ->when(!$user || $user->role != 1, function ($query) {
                 return $query->where('published', 1);
@@ -155,7 +155,8 @@ class QuestsController extends ApiController
                 'id' => $quest->id,
                 'title' => $quest->title,
                 'image' => $quest->getImage(),
-                'content' => $quest->getPs(),
+                'content' => $quest->getPs($quest->content), 
+                'content2' => $quest->getPs($quest->content2),
                 'city_id' => $quest->city_id,
                 'city' => $quest->city->title ?? '',
                 'start_point' => $quest->start_point,
